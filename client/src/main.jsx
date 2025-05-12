@@ -1,10 +1,24 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+// main.jsx
+import React from 'react';
+import { createContext } from 'react';
+import { createRoot } from 'react-dom/client';
 import './styles/main.css'; 
-import App from './App.jsx'
+import App from './App.jsx';
+import UserStore from './store/UserStore.js';
 
-createRoot(document.getElementById('root')).render(
-  <StrictMode>
+export const Context = createContext(null);
+
+// 1) Найти контейнер
+const container = document.getElementById('root');
+
+// 2) Создать root
+const root = createRoot(container);
+
+// 3) Рендерить через root.render
+root.render(
+  <Context.Provider value={{
+    user: new UserStore()
+  }}>
     <App />
-  </StrictMode>,
-)
+  </Context.Provider>
+);
