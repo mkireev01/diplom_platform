@@ -3,8 +3,8 @@ const {User} = require("../models/models")
 const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize');
 
-const generateJwt = (id, fullName, email, role) => {
-    const payload = { id, fullName, email, role };
+const generateJwt = (id, firstName, lastName, email, role) => {
+    const payload = { id, firstName, lastName, email, role };
     return jwt.sign(
         payload,
         process.env.SECRET_KEY,
@@ -16,9 +16,9 @@ class UserController {
   
     async registration(req, res) {
         try {
-          const { fullName, email, password, role } = req.body;
+          const { firstName, lastName, email, password, role } = req.body;
           // Проверка обязательных полей
-          if (!fullName || !email || !password) {
+          if (!firstName || !lastName || !email || !password) {
             return res.status(400).json({ error: "Не заполнены обязательные поля" });
           }
     
@@ -27,7 +27,8 @@ class UserController {
             where: {
               [Op.or]: [
                 { email },
-                { fullName }
+                { firstName },
+                { lastName}
               ]
             }
           });
@@ -41,7 +42,8 @@ class UserController {
     
           // Создаем пользователя
           const user = await User.create({
-            fullName,
+            firstName,
+            lastName,
             email,
             password: hashedPassword,
             role: role || 'USER'
@@ -87,7 +89,8 @@ class UserController {
           // Генерируем JWT (используем тот же generateJwt)
           const token = generateJwt(
             user.id,
-            user.fullName,
+            user.firstName,
+            user.lastName,
             user.email,
             user.role
           );

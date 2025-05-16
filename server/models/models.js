@@ -1,74 +1,99 @@
-const sequelize = require('../db')
-const {DataTypes} = require('sequelize')
+const sequelize = require('../db');
+const { DataTypes } = require('sequelize');
 
 const User = sequelize.define("User", {
-    fullName: DataTypes.STRING,
-    email: {type: DataTypes.STRING, unique: true },
-    password: DataTypes.STRING,
-    role: DataTypes.ENUM('employer', 'seeker'),
-})
-
-const Company = sequelize.define("Company", {
-    name: DataTypes.STRING,
-    description: DataTypes.TEXT,
-})
-
-const Resume = sequelize.define("Resume", {
-    title: DataTypes.STRING,
-    experience: DataTypes.TEXT,
-    skills: DataTypes.ARRAY(DataTypes.STRING),
-})
-
-const Vacancy = sequelize.define('Vacancy', {
-    title: DataTypes.STRING,
-    description: DataTypes.TEXT,
-    salaryFrom: DataTypes.INTEGER,
-    salaryTo: DataTypes.INTEGER,
-})
-
-const Application = sequelize.define('Application', {
-    status: {
-      type: DataTypes.ENUM('new', 'viewed', 'accepted', 'rejected'),
-      defaultValue: 'new'
-    }
+  firstName:    { type: DataTypes.STRING, allowNull: false },
+  lastName:     { type: DataTypes.STRING, allowNull: false },
+  email:        { type: DataTypes.STRING, unique: true, allowNull: false },
+  password:     { type: DataTypes.STRING, allowNull: false },
+  role:         { type: DataTypes.ENUM('employer', 'seeker'), allowNull: false },
 });
 
+// Профиль компании
+const Company = sequelize.define("Company", {
+  name:        { type: DataTypes.STRING, allowNull: false },
+  description: { type: DataTypes.TEXT },
+});
+
+// Резюме соискателя
+const Resume = sequelize.define("Resume", {
+  firstName:     { type: DataTypes.STRING, allowNull: false },
+  lastName:      { type: DataTypes.STRING, allowNull: false },
+  nationality:   { type: DataTypes.STRING },
+  birthDate:     { type: DataTypes.DATEONLY },
+  skills:        { type: DataTypes.ARRAY(DataTypes.STRING), defaultValue: [] },
+  experience:    { type: DataTypes.TEXT },      // краткое описание опыта
+  fullText:      { type: DataTypes.TEXT },      // полное резюме
+});
+
+// Вакансии
+const Vacancy = sequelize.define('Vacancy', {
+  title:           { type: DataTypes.STRING, allowNull: false },
+  description:     { type: DataTypes.TEXT },    // краткое описание
+  fullDescription: { type: DataTypes.TEXT },    // полное описание для страницы вакансии
+  salaryFrom:      { type: DataTypes.INTEGER },
+  salaryTo:        { type: DataTypes.INTEGER },
+});
+
+// Отклики (Applications)
+const Application = sequelize.define('Application', {
+  status: {
+    type: DataTypes.ENUM('new', 'viewed', 'accepted', 'rejected'),
+    defaultValue: 'new'
+  }
+});
+
+// Чаты и сообщения
 const Chat = sequelize.define('Chat', {});
 
 const Message = sequelize.define('Message', {
-    content: DataTypes.TEXT,
+  content: { type: DataTypes.TEXT, allowNull: false },
 });
 
+
+// ─── СВЯЗИ ────────────────────────────────────────────────────────────────────
+
+// Пользователь ↔ Компания
 User.hasOne(Company, { foreignKey: 'userId' });
-User.hasMany(Resume, { foreignKey: 'userId' });
-User.hasMany(Chat, { foreignKey: 'userId' });
-User.hasMany(Message, { foreignKey: 'senderId' });
-
 Company.belongsTo(User, { foreignKey: 'userId' });
-Company.hasMany(Vacancy, { foreignKey: 'companyId' });
 
+// Пользователь ↔ Резюме
+User.hasMany(Resume, { foreignKey: 'userId' });
 Resume.belongsTo(User, { foreignKey: 'userId' });
-Resume.hasMany(Application, { foreignKey: 'resumeId' });
 
+// Компания ↔ Вакансии
+Company.hasMany(Vacancy, { foreignKey: 'companyId' });
 Vacancy.belongsTo(Company, { foreignKey: 'companyId' });
-Vacancy.hasMany(Application, { foreignKey: 'vacancyId' });
 
+// Резюме ↔ Отклики
+Resume.hasMany(Application, { foreignKey: 'resumeId' });
 Application.belongsTo(Resume, { foreignKey: 'resumeId' });
+
+// Вакансия ↔ Отклики
+Vacancy.hasMany(Application, { foreignKey: 'vacancyId' });
 Application.belongsTo(Vacancy, { foreignKey: 'vacancyId' });
 
-Chat.belongsTo(User, { as: 'seeker', foreignKey: 'seekerId' });
+// Чат между соискателем и работодателем
+Chat.belongsTo(User, { as: 'seeker',   foreignKey: 'seekerId' });
 Chat.belongsTo(User, { as: 'employer', foreignKey: 'employerId' });
-Chat.hasMany(Message, { foreignKey: 'chatId' });
+User.hasMany(Chat, { foreignKey: 'seekerId' });
+User.hasMany(Chat, { foreignKey: 'employerId' });
 
+// Чат ↔ Сообщения
+Chat.hasMany(Message, { foreignKey: 'chatId' });
 Message.belongsTo(Chat, { foreignKey: 'chatId' });
+
+// Пользователь ↔ Сообщения
+User.hasMany(Message, { foreignKey: 'senderId' });
 Message.belongsTo(User, { foreignKey: 'senderId' });
 
+
 module.exports = {
-    User,
-    Company,
-    Resume,
-    Vacancy,
-    Application,
-    Chat,
-    Message
-}
+  User,
+  Company,
+  Resume,
+  Vacancy,
+  Application,
+  Chat,
+  Message
+};
