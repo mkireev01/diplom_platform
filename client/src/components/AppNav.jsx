@@ -11,7 +11,7 @@ const AppNav = observer(() => {
   // Общие пропсы для всех кнопок
   const btnProps = {
     size: "lg",
-    className: "me-2",      // отступ справа
+    className: "me-2 mt-2",      // отступ справа
     style: { minWidth: 120 } // минимальная ширина
   };
 

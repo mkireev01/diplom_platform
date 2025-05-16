@@ -2,7 +2,7 @@ const {Application } = require("../models/models")
 
 class ApplicationController {
 
-    // CREATE
+
     async create(req, res) {
       try {
         const record = await Application.create(req.body);

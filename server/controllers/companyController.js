@@ -5,8 +5,8 @@ class CompanyController {
   // CREATE
   async create(req, res) {
     try {
-      const record = await Company.create(req.body);
-      return res.status(201).json(record);
+      const company = await Company.create(req.body);
+      return res.status(201).json(company);
     } catch (err) {
       return res.status(400).json({ error: err.message });
     }

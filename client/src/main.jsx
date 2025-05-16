@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import './styles/main.css'; 
 import App from './App.jsx';
 import UserStore from './store/UserStore.js';
+import VacancyStore from './store/VacanciesStore.js';
 
 export const Context = createContext(null);
 
@@ -17,7 +18,8 @@ const root = createRoot(container);
 // 3) Рендерить через root.render
 root.render(
   <Context.Provider value={{
-    user: new UserStore()
+    user: new UserStore(),
+    vacancies: new VacancyStore()
   }}>
     <App />
   </Context.Provider>

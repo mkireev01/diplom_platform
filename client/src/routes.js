@@ -18,7 +18,7 @@ import Applicants from "./pages/employer/Applicants";
 export const publicRoutes = [
   { path: "/", Component: Home },
   { path: "/login", Component: Auth },
-  { path: "/register", Component: Auth},
+  { path: "/registration", Component: Auth},
   { path: "/vacancies", Component: VacancyList },
   { path: "/vacancy/:id", Component: VacancyDetail },
   { path: "/resumes", Component: ResumeList },
