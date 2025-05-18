@@ -6,9 +6,10 @@ import './styles/main.css';
 import App from './App.jsx';
 import UserStore from './store/UserStore.js';
 import VacancyStore from './store/VacanciesStore.js';
+import ResumeStore from './store/ResumeStore.js';
 
 export const Context = createContext(null);
-
+console.log(import.meta.env.VITE_APP_API_URL)
 // 1) Найти контейнер
 const container = document.getElementById('root');
 
@@ -19,7 +20,8 @@ const root = createRoot(container);
 root.render(
   <Context.Provider value={{
     user: new UserStore(),
-    vacancies: new VacancyStore()
+    vacancies: new VacancyStore(),
+    resumes: new ResumeStore()
   }}>
     <App />
   </Context.Provider>

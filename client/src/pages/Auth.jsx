@@ -1,3 +1,4 @@
+// src/pages/Auth.jsx
 import React, { useState } from 'react';
 import {
   Button,
@@ -62,14 +63,24 @@ const Auth = () => {
         )}
 
         <Form>
-          {/* First + Last name fields */}
+          {/* First + Last name fields side by side */}
           {!isLogin && (
+            <Row className="mb-3">
+              <Col>
                 <Form.Control
-                  className="mb-3"
-                  placeholder="Имя и фамилия"
+                  placeholder="Имя"
                   value={firstName}
                   onChange={e => setFirstName(e.target.value)}
-                /> 
+                />
+              </Col>
+              <Col>
+                <Form.Control
+                  placeholder="Фамилия"
+                  value={lastName}
+                  onChange={e => setLastName(e.target.value)}
+                />
+              </Col>
+            </Row>
           )}
 
           {/* Email */}

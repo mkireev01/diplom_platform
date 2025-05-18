@@ -1,8 +1,4 @@
 import Home from "./pages/Home";
-import VacancyList from "./pages/VacancyList";
-import VacancyDetail from "./pages/VacancyDetail";
-import ResumeList from "./pages/ResumeList";
-import ResumeDetail from "./pages/ResumeDetail";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Profile from "./pages/seeker/Profile";
@@ -13,16 +9,17 @@ import CompanyProfile from "./pages/employer/CompanyProfile";
 import PostVacancy from "./pages/employer/PostVacancy";
 import MyVacancies from "./pages/employer/MyVacancies";
 import Applicants from "./pages/employer/Applicants";
+import ItemDetailPage from "./pages/ItemDetailPage";
 
 
 export const publicRoutes = [
   { path: "/", Component: Home },
   { path: "/login", Component: Auth },
   { path: "/registration", Component: Auth},
-  { path: "/vacancies", Component: VacancyList },
-  { path: "/vacancy/:id", Component: VacancyDetail },
-  { path: "/resumes", Component: ResumeList },
-  { path: "/resume/:id", Component: ResumeDetail },
+  { path: "/vacancies", Component: Home },
+  { path: "/vacancy/:id", Component: ItemDetailPage },
+  { path: "/resumes", Component: Home},
+  { path: "/resume/:id", Component: ItemDetailPage },
   { path: "*", Component: NotFound },
 ];
 

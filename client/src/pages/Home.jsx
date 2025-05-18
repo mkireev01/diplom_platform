@@ -8,20 +8,27 @@ import {
   Col,
   Form,
   Card,
-  Button
+  Button,
+  Pagination
 } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
 
-const VacancyPage = observer(() => {
-  const { vacancies } = useContext(Context);
+const Home= observer(() => {
+  const { user, vacancies, resumes } = useContext(Context);
+  const isEmployer = user.user.role === 'employer';
+  const isSeeker = user.user.role === 'seeker';
 
-  // Локальные состояния для поиска и фильтра
+  // Общие фильтры
   const [keyword, setKeyword] = useState('');
   const [minSalary, setMinSalary] = useState('');
   const [maxSalary, setMaxSalary] = useState('');
 
-  // Отфильтрованный список
-  const filtered = useMemo(() => {
+  // Пагинация
+  const itemsPerPage = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Фильтрация данных
+  const filteredVacancies = useMemo(() => {
     return vacancies.vacancies.filter(v => {
       const text = (v.title + ' ' + v.description).toLowerCase();
       if (keyword && !text.includes(keyword.toLowerCase())) return false;
@@ -30,6 +37,37 @@ const VacancyPage = observer(() => {
       return true;
     });
   }, [vacancies.vacancies, keyword, minSalary, maxSalary]);
+
+  const filteredResumes = useMemo(() => {
+    return resumes.resumes.filter(r => {
+      const text = (r.firstName + ' ' + r.lastName + ' ' + r.experience).toLowerCase();
+      if (keyword && !text.includes(keyword.toLowerCase())) return false;
+      if (minSalary && r.salary < Number(minSalary)) return false;
+      if (maxSalary && r.salary > Number(maxSalary)) return false;
+      return true;
+    });
+  }, [resumes.resumes, keyword, minSalary, maxSalary]);
+
+  const items = isEmployer ? filteredResumes : filteredVacancies;
+  const totalItems = items.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
+  const paginatedItems = items.slice(startIndex, endIndex);
+
+  const handlePageChange = page => setCurrentPage(page);
+  const handleResetFilters = () => {
+    setKeyword('');
+    setMinSalary('');
+    setMaxSalary('');
+    setCurrentPage(1);
+  };
+
+  // Обработчик отклика для соискателя
+  const handleApply = (vacancyId) => {
+    // Здесь можно вызвать метод из vacancies, например:
+    vacancies.apply(vacancyId);
+  };
 
   return (
     <Container fluid className="mt-4">
@@ -51,7 +89,7 @@ const VacancyPage = observer(() => {
           <Card className="p-3 mb-4 shadow-sm">
             <h5>Фильтры</h5>
             <Form.Group className="mb-3">
-              <Form.Label>Зарплата от (BYN)</Form.Label>
+              <Form.Label>Зарплата от</Form.Label>
               <Form.Control
                 type="number"
                 placeholder="мин."
@@ -60,7 +98,7 @@ const VacancyPage = observer(() => {
               />
             </Form.Group>
             <Form.Group className="mb-3">
-              <Form.Label>Зарплата до (₽)</Form.Label>
+              <Form.Label>Зарплата до</Form.Label>
               <Form.Control
                 type="number"
                 placeholder="макс."
@@ -71,50 +109,89 @@ const VacancyPage = observer(() => {
             <Button
               variant="outline-secondary"
               size="sm"
-              onClick={() => {
-                setMinSalary('');
-                setMaxSalary('');
-              }}
+              onClick={handleResetFilters}
             >
               Сбросить фильтры
             </Button>
           </Card>
         </Col>
 
-        {/* Правая колонка — список вакансий */}
+        {/* Правая колонка — список */}
         <Col md={9}>
-          {filtered.length === 0 ? (
+          {totalItems === 0 ? (
             <p>Ничего не найдено.</p>
           ) : (
-            filtered.map(v => (
-              <Card key={v.id} className="mb-3 shadow-sm">
-                <Card.Body className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <Card.Title>{v.title}</Card.Title>
-                    <Card.Text className="text-muted">
-                      {v.description.length > 100
-                        ? v.description.slice(0, 100) + '…'
-                        : v.description}
-                    </Card.Text>
+            <>
+              {/* Индикация диапазона */}
+              <p className="text-muted">
+                Показаны {startIndex + 1}–{endIndex} из {totalItems}
+              </p>
+
+              {paginatedItems.map(item => (
+                <Card key={item.id} className="mb-3 shadow-sm">
+                  <Card.Body className="d-flex justify-content-between align-items-center">
                     <div>
-                      <strong>
-                        {v.salaryFrom.toLocaleString()}₽
-                        {v.salaryTo
-                          ? ` – ${v.salaryTo.toLocaleString()}₽`
-                          : ''}
-                      </strong>
+                      <Card.Title>
+                        {isEmployer
+                          ? `${item.firstName} ${item.lastName}`
+                          : item.title}
+                      </Card.Title>
+                      <Card.Text className="text-muted">
+                        {isEmployer
+                          ? (item.experience.length > 100
+                            ? item.experience.slice(0, 100) + '…'
+                            : item.experience)
+                          : (item.description.length > 100
+                            ? item.description.slice(0, 100) + '…'
+                            : item.description)
+                        }
+                      </Card.Text>
                     </div>
-                  </div>
-                  <Button
-                    as={NavLink}
-                    to={`/vacancy/${v.id}`}
-                    variant="primary"
-                  >
-                    Подробнее
-                  </Button>
-                </Card.Body>
-              </Card>
-            ))
+                    <div className="d-flex">
+                      {isSeeker && (
+                        <Button
+                          variant="success"
+                          className="me-2"
+                          onClick={() => handleApply(item.id)}
+                        >
+                          Откликнуться
+                        </Button>
+                      )}
+                      <Button
+                        as={NavLink}
+                        to={`/${isEmployer ? 'resume' : 'vacancy'}/${item.id}`}
+                        variant="primary"
+                      >
+                        Подробнее
+                      </Button>
+                    </div>
+                  </Card.Body>
+                </Card>
+              ))}
+
+              {/* Пагинация */}
+              {totalPages > 1 && (
+                <Pagination className="justify-content-center">
+                  <Pagination.Prev
+                    disabled={currentPage === 1}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                  />
+                  {Array.from({ length: totalPages }).map((_, idx) => (
+                    <Pagination.Item
+                      key={idx + 1}
+                      active={currentPage === idx + 1}
+                      onClick={() => handlePageChange(idx + 1)}
+                    >
+                      {idx + 1}
+                    </Pagination.Item>
+                  ))}
+                  <Pagination.Next
+                    disabled={currentPage === totalPages}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                  />
+                </Pagination>
+              )}
+            </>
           )}
         </Col>
       </Row>
@@ -122,4 +199,4 @@ const VacancyPage = observer(() => {
   );
 });
 
-export default VacancyPage;
+export default Home;
