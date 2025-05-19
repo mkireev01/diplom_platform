@@ -27,8 +27,6 @@ class UserController {
             where: {
               [Op.or]: [
                 { email },
-                { firstName },
-                { lastName}
               ]
             }
           });
@@ -64,11 +62,7 @@ class UserController {
           const { email, password } = req.body;
       
           // Проверка обязательных полей
-          if (!email || !password) {
-            return res
-              .status(400)
-              .json({ error: "Не заполнены обязательные поля" });
-          }
+         
       
           // Ищем пользователя по email
           const user = await User.findOne({ where: { email } });
@@ -109,7 +103,8 @@ class UserController {
     async check(req, res, next) {
         const token = generateJwt(
             req.user.id,
-            req.user.fullName,
+            req.user.firstName,
+            req.user.lastName,
             req.user.email,
             req.user.role
           );
