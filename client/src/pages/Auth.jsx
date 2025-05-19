@@ -1,5 +1,5 @@
 // src/pages/Auth.jsx
-import React, { useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -10,13 +10,17 @@ import {
   Row,
   Col
 } from 'react-bootstrap';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { login, registration } from '../http/userAPI';
+import { observer } from 'mobx-react-lite';
+import { Context } from '../main';
 
-const Auth = () => {
+const Auth = observer(() => {
+  const { user } = useContext(Context);
   const location = useLocation();
+  const navigate = useNavigate();
   const isLogin = location.pathname === '/login';
 
-  // form state
   const [role, setRole] = useState('seeker');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -25,6 +29,32 @@ const Auth = () => {
   const [confirm, setConfirm] = useState('');
 
   const passwordsMatch = password === confirm;
+
+  useEffect(() => {
+    setRole('seeker');
+    setFirstName('');
+    setLastName('');
+    setEmail('');
+    setPassword('');
+    setConfirm('');
+  }, [location.pathname]);
+
+  const click = async () => {
+    try {
+      let data;
+      if (isLogin) {
+        data = await login(email, password);
+        user.setUser(data);
+        user.setIsAuth(true);
+        navigate('/');
+      } else {
+        data = await registration(firstName, lastName, email, password, role);
+        navigate('/login')
+      }
+    } catch (e) {
+      alert(e.response.data.message)
+    }
+  };
 
   const roles = [
     { name: 'Соискатель', value: 'seeker' },
@@ -41,7 +71,6 @@ const Auth = () => {
           {isLogin ? 'Авторизация' : 'Регистрация'}
         </h2>
 
-        {/* Role toggle on registration */}
         {!isLogin && (
           <ButtonGroup className="d-flex mb-4">
             {roles.map((r, idx) => (
@@ -63,7 +92,6 @@ const Auth = () => {
         )}
 
         <Form>
-          {/* First + Last name fields side by side */}
           {!isLogin && (
             <Row className="mb-3">
               <Col>
@@ -83,7 +111,6 @@ const Auth = () => {
             </Row>
           )}
 
-          {/* Email */}
           <Form.Control
             className="mb-3"
             placeholder="Введите Ваш email..."
@@ -92,7 +119,6 @@ const Auth = () => {
             onChange={e => setEmail(e.target.value)}
           />
 
-          {/* Password */}
           <Form.Control
             className="mb-3"
             placeholder="Введите Ваш пароль"
@@ -101,7 +127,6 @@ const Auth = () => {
             onChange={e => setPassword(e.target.value)}
           />
 
-          {/* Confirm password on registration */}
           {!isLogin && (
             <>
               <Form.Control
@@ -119,22 +144,20 @@ const Auth = () => {
             </>
           )}
 
-          {/* Text + button row */}
           <div className="d-flex justify-content-between align-items-center mt-4">
             {isLogin ? (
               <div>
-                Нет аккаунта?{' '}
-                <NavLink to="/registration">Зарегистрируйся</NavLink>
+                Нет аккаунта? <NavLink to="/registration">Зарегистрируйся</NavLink>
               </div>
             ) : (
               <div>
-                Есть аккаунт?{' '}
-                <NavLink to="/login">Войдите</NavLink>
+                Есть аккаунт? <NavLink to="/login">Войдите</NavLink>
               </div>
             )}
             <Button
               variant="outline-success"
               disabled={!isLogin && !passwordsMatch}
+              onClick={click}
             >
               {isLogin ? 'Войти' : 'Зарегистрироваться'}
             </Button>
@@ -143,6 +166,6 @@ const Auth = () => {
       </Card>
     </Container>
   );
-};
+});
 
 export default Auth;

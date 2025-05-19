@@ -11,6 +11,7 @@ import {
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FaUserCircle } from 'react-icons/fa';
 import { observer } from 'mobx-react-lite';
+import CreateResume from './CreateResume';
 
 const AppNav = observer(() => {
   const { user } = useContext(Context);
@@ -20,6 +21,11 @@ const AppNav = observer(() => {
   const isEmployer = user.user?.role === 'employer';
   const isCandidate = user.user?.role === 'seeker';
 
+  const [showCreateModal, setShowCreateModal] = useState(false);
+
+  const handleOpenCreate    = () => setShowCreateModal(true);
+  const handleCloseCreate   = () => setShowCreateModal(false);
+
   const handleProfileClick = () => setShowProfileModal(true);
   const handleClose = () => setShowProfileModal(false);
 
@@ -27,6 +33,13 @@ const AppNav = observer(() => {
     size: 'lg',
     className: 'me-2 mt-2',
     style: { minWidth: 120 }
+  };
+
+  const logout = () => {
+    user.setUser({});
+    user.setIsAuth(false);
+    localStorage.removeItem("user");
+    localStorage.removeItem("isAuth");
   };
 
   return (
@@ -52,22 +65,20 @@ const AppNav = observer(() => {
               </Button>
 
               {user.isAuth && (
-                <Button
-                  as={NavLink}
-                  to={isEmployer ? '/create-vacancy' : '/create-resume'}
-                  variant="success"
-                  {...btnProps}
-                >
-                  {isEmployer ? 'Создать вакансию' : 'Создать резюме'}
-                </Button>
+               <Button
+                 variant="success"
+                 onClick={handleOpenCreate}
+                 {...btnProps}
+               >
+                 {isEmployer ? 'Создать вакансию' : 'Создать резюме'}
+               </Button>
               )}
 
               {!user.isAuth ? (
                 <Button
                   as={NavLink}
-                  to="/login"
+                  to="/registration"
                   variant="light"
-                  onClick={() => user.setIsAuth(true)}
                   {...btnProps}
                 >
                   Авторизация
@@ -76,10 +87,7 @@ const AppNav = observer(() => {
                 <>
                   <Button
                     variant="outline-light"
-                    onClick={() => {
-                      user.setIsAuth(false);
-                      user.setUser({});
-                    }}
+                    onClick={logout}
                     {...btnProps}
                   >
                     Выход
@@ -140,6 +148,13 @@ const AppNav = observer(() => {
           </ListGroup>
         </Modal.Body>
       </Modal>
+      
+
+      {/* Модалка CreateResume/CreateVacancy */}
+     <CreateResume
+       show={showCreateModal}
+      onHide={handleCloseCreate}
+     />
     </>
   );
 });

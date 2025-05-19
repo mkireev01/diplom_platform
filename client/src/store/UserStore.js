@@ -1,31 +1,34 @@
-import {makeAutoObservable} from "mobx"
+import { makeAutoObservable } from "mobx";
 
 export default class UserStore {
-    constructor() {
-        this._isAuth = true
-         this._user = {
-            id: 1,
-            firstName: "Иван",
-            lastName: "Иванов",
-            email: "ivan.ivanov@example.com",
-            role: "seeker"             // <-- здесь можно ставить 'employer' или 'seeker'
-        };
-        makeAutoObservable(this)
-    }
+  constructor() {
+    this._user = JSON.parse(localStorage.getItem("user")) || {};
+    this._isAuth = JSON.parse(localStorage.getItem("isAuth")) || false;
+    makeAutoObservable(this);
+  }
 
-    setIsAuth(bool) {
-        this._isAuth = bool
-    }
-    
-    setUser(user) {
-        this._user = user
-    }
+  setUser(user) {
+    this._user = user;
+    localStorage.setItem("user", JSON.stringify(user)); // Сохраняем в localStorage
+  }
 
-    get isAuth() {
-        return this._isAuth
-    }
+  setIsAuth(isAuth) {
+    this._isAuth = isAuth;
+    localStorage.setItem("isAuth", JSON.stringify(isAuth)); // Сохраняем в localStorage
+  }
 
-    get user() {
-        return this._user
-    }
+  get user() {
+    return this._user;
+  }
+
+  get isAuth() {
+    return this._isAuth;
+  }
+
+  logout() {
+    this.setUser({});
+    this.setIsAuth(false);
+    localStorage.removeItem("user");
+    localStorage.removeItem("isAuth");
+  }
 }

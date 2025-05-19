@@ -9,7 +9,7 @@ import VacancyStore from './store/VacanciesStore.js';
 import ResumeStore from './store/ResumeStore.js';
 
 export const Context = createContext(null);
-console.log(import.meta.env.VITE_APP_API_URL)
+
 // 1) Найти контейнер
 const container = document.getElementById('root');
 
