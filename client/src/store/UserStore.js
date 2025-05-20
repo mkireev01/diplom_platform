@@ -1,4 +1,5 @@
 import { makeAutoObservable } from "mobx";
+import axios from "axios"
 
 export default class UserStore {
   constructor() {
@@ -25,10 +26,10 @@ export default class UserStore {
     return this._isAuth;
   }
 
-  logout() {
-    this.setUser({});
-    this.setIsAuth(false);
-    localStorage.removeItem("user");
-    localStorage.removeItem("isAuth");
-  }
+  // logout() {
+  //   localStorage.removeItem('token');
+  //   delete axios.defaults.headers.common['Authorization'];
+  //   user.setUser({});
+  //   user.setIsAuth(false);
+  // }
 }

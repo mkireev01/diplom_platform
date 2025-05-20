@@ -1,7 +1,6 @@
 import Home from "./pages/Home";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
-import Profile from "./pages/seeker/Profile";
 import MyResumes from "./pages/seeker/MyResumes";
 import Applications from "./pages/seeker/Applications";
 import Chat from "./pages/Chat";
@@ -10,6 +9,7 @@ import PostVacancy from "./pages/employer/PostVacancy";
 import MyVacancies from "./pages/employer/MyVacancies";
 import Applicants from "./pages/employer/Applicants";
 import ItemDetailPage from "./pages/ItemDetailPage";
+import UserProfile from "./pages/UserProfile";
 
 
 export const publicRoutes = [
@@ -21,17 +21,17 @@ export const publicRoutes = [
   { path: "/resumes", Component: Home},
   { path: "/resume/:id", Component: ItemDetailPage },
   { path: "*", Component: NotFound },
+  { path: "/profile", Component: UserProfile },
 ];
 
 export const seekerRoutes = [
-    { path: "/profile", Component: Profile },
     { path: "/my-resumes", Component: MyResumes },
     { path: "/applications", Component: Applications },
     { path: "/chat", Component: Chat},
 ];
 
 export const employerRoutes = [
-  { path: "/company", Component: CompanyProfile },
+  { path: "/my-companies", Component: CompanyProfile },
   { path: "/post-vacancy", Component: PostVacancy },
   { path: "/my-vacancies", Component: MyVacancies},
   { path: "/applicants", Component: Applicants },

@@ -5,15 +5,22 @@ import AppRouter from './components/AppRouter';
 import AppNav    from './components/AppNav';
 import { Context } from './main';
 import { check }   from './http/userAPI';
+import axios from "axios"
 
 const App = observer(() => {
   const { user } = useContext(Context);
   const [loading, setLoading] = useState(true);
 
+  const logout = () => {
+    localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
+    user.setUser({});
+    user.setIsAuth(false);
+  };
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      user.logout();      // очищает и MobX, и localStorage
+      logout();      // очищает и MobX, и localStorage
       setLoading(false);
       return;
     }

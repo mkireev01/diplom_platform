@@ -1,4 +1,4 @@
-// src/store/ResumeStore.js
+
 import { makeAutoObservable } from "mobx";
 
 export default class ResumeStore {

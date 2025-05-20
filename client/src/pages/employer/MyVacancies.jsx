@@ -1,8 +1,11 @@
-import React from 'react'
+import React from "react";
+
 
 const MyVacancies = () => {
     return (
-        <div> </div>
+        <div>
+            
+        </div>
     )
 }
 

@@ -11,14 +11,28 @@ import {
   Pagination
 } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
+import { createVacancy, fetchVacancy  } from '../http/vacancyAPI';
+import { fetchResume } from '../http/resumeAPI';
 
-const VacancyPage = observer(() => {
+const Home = observer(() => {
   const { user, vacancies, resumes } = useContext(Context);
 
   // Логируем в консоль, кем нас считает стор
   useEffect(() => {
     console.log('🏷 VacancyPage — role:', user.user?.role, 'isAuth:', user.isAuth);
   }, [user.user, user.isAuth]);
+
+  useEffect(() => {
+    // когда пользователь инициализируется — запускаем fetch
+    if (!user.isAuth) {
+      // гость
+      fetchVacancy().then(data => vacancies.setVacancies(data));
+    } else if (user.user.role === "seeker") {
+      fetchVacancy().then(data => vacancies.setVacancies(data));
+    } else if (user.user.role === "employer") {
+      fetchResume().then(data => resumes.setResumes(data));
+    }
+  }, [user.isAuth, user.user?.role]);
 
   const isEmployer = user.isAuth && user.user?.role === 'employer';
 
@@ -68,6 +82,11 @@ const VacancyPage = observer(() => {
     setKeyword(''); setMinSalary(''); setMaxSalary('');
   };
 
+  const btnProps = {
+    size: 'lg',
+    className: 'me-2 mt-2',
+    style: { minWidth: 100 }
+  };
   return (
     <Container fluid className="mt-4">
       <Row className="mb-3">
@@ -129,13 +148,14 @@ const VacancyPage = observer(() => {
                     </div>
                     <div className="d-flex">
                       {!isEmployer && user.isAuth && (
-                        <Button className="me-2" onClick={() => handleApply(item.id)}>
+                        <Button className="me-2" onClick={() => handleApply(item.id)} {...btnProps}>
                           Откликнуться
                         </Button>
                       )}
                       <Button
                         as={NavLink}
                         to={`/${isEmployer ? 'resume' : 'vacancy'}/${item.id}`}
+                        {...btnProps}
                       >
                         Подробнее
                       </Button>
@@ -173,4 +193,4 @@ const VacancyPage = observer(() => {
   );
 });
 
-export default VacancyPage;
+export default Home;

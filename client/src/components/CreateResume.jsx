@@ -2,6 +2,10 @@
 import React, { useContext, useState } from "react";
 import { Context } from "../main";
 import { Col, Form, Modal, Row, Button } from "react-bootstrap";
+import { createVacancy } from "../http/vacancyAPI";
+import { createResume } from "../http/resumeAPI";
+
+
 
 const CreateResume = ({ show, onHide }) => {
   const { user } = useContext(Context);
@@ -19,6 +23,36 @@ const CreateResume = ({ show, onHide }) => {
   const [salaryFrom, setSalaryFrom] = useState(0);
   const [salaryTo, setSalaryTo] = useState(0)
 
+
+  const addResume = () => {
+    const skillsArray = skills
+    .split(',')                 // разделяем по запятой
+    .map(s => s.trim())         // обрезаем пробелы
+    .filter(s => s.length > 0); // отбрасываем пустые
+
+    createResume(firstName, lastName, nationality, birthDate, skillsArray, experience, fullText).then(data => {
+      setFirstName("")
+      setLastName("")
+      setNationality("")
+      setBirthDate("")
+      setSkills("")
+      setExperience("")
+      setFullText("")
+      onHide()
+    }
+    )
+  }
+
+  const addVacancy = () => {
+    createVacancy(titleVacancy, descriptionVacancy, fullDescriptionVacancy, salaryFrom, salaryTo).then(data => {
+      setTitleVacancy("")
+      setDescriptionVacancy("")
+      setFullDescriptionVacancy("")
+      setSalaryFrom(0)
+      setSalaryTo(0)
+      onHide()
+    })
+  }
 
   const handleSubmit = () => {
     // TODO: отправить форму (через fetch/axios/MobX)
@@ -92,7 +126,7 @@ const CreateResume = ({ show, onHide }) => {
           <Button
             className="mt-3"
             variant="primary"
-            onClick={handleSubmit}
+            onClick={addResume}
             block
           >
             Сохранить
@@ -146,7 +180,7 @@ const CreateResume = ({ show, onHide }) => {
           <Button
             className="mt-3"
             variant="primary"
-            onClick={handleSubmit}
+            onClick={addVacancy}
             block
           >
             Сохранить

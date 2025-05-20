@@ -6,28 +6,35 @@ import {
   Nav,
   Button,
   Modal,
-  ListGroup
+  ListGroup,
+  Form
 } from 'react-bootstrap';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { FaUserCircle } from 'react-icons/fa';
 import { observer } from 'mobx-react-lite';
 import CreateResume from './CreateResume';
+import { createCompany } from '../http/companyAPI';
+import axios from 'axios';
 
 const AppNav = observer(() => {
   const { user } = useContext(Context);
   const navigate = useNavigate();
-  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const isEmployer = user.user?.role === 'employer';
   const isCandidate = user.user?.role === 'seeker';
 
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showCompanyModal, setShowCompanyModal] = useState(false);
 
-  const handleOpenCreate    = () => setShowCreateModal(true);
-  const handleCloseCreate   = () => setShowCreateModal(false);
+  const handleOpenCreate = () => setShowCreateModal(true);
+  const handleCloseCreate = () => setShowCreateModal(false);
+
+  const handleOpenCompany = () => setShowCompanyModal(true);
+  const handleCloseCompany = () => setShowCompanyModal(false);
 
   const handleProfileClick = () => setShowProfileModal(true);
-  const handleClose = () => setShowProfileModal(false);
+  const handleCloseProfile = () => setShowProfileModal(false);
 
   const btnProps = {
     size: 'lg',
@@ -36,10 +43,30 @@ const AppNav = observer(() => {
   };
 
   const logout = () => {
+    localStorage.removeItem('token');
+    delete axios.defaults.headers.common['Authorization'];
     user.setUser({});
     user.setIsAuth(false);
-    localStorage.removeItem("user");
-    localStorage.removeItem("isAuth");
+    navigate('/');
+  };
+
+  // Company form state
+  const [companyName, setCompanyName] = useState('');
+  const [companyDesc, setCompanyDesc] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const handleSaveCompany = async () => {
+    setSaving(true);
+    try {
+      await createCompany(companyName, companyDesc);
+      setCompanyName('');
+      setCompanyDesc('');
+      handleCloseCompany();
+    } catch (err) {
+      console.error('Ошибка создания компании:', err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -51,53 +78,42 @@ const AppNav = observer(() => {
           </Navbar.Brand>
 
           <Navbar.Toggle aria-controls="main-navbar" />
-
           <Navbar.Collapse id="main-navbar" className="justify-content-end">
             <Nav className="d-flex align-items-center">
-
-              <Button
-                as={NavLink}
-                to="/vacancies"
-                variant="outline-light"
-                {...btnProps}
-              >
+              <Button as={NavLink} to="/vacancies" variant="outline-light" {...btnProps}>
                 Вакансии
               </Button>
 
               {user.isAuth && (
-               <Button
-                 variant="success"
-                 onClick={handleOpenCreate}
-                 {...btnProps}
-               >
-                 {isEmployer ? 'Создать вакансию' : 'Создать резюме'}
-               </Button>
+                <>
+                  {isEmployer && (
+                    <>
+                      <Button variant="success" onClick={handleOpenCreate} {...btnProps}>
+                        Создать вакансию
+                      </Button>
+                      <Button variant="warning" onClick={handleOpenCompany} {...btnProps}>
+                        Создать компанию
+                      </Button>
+                    </>
+                  )}
+                  {isCandidate && (
+                    <Button variant="success" onClick={handleOpenCreate} {...btnProps}>
+                      Создать резюме
+                    </Button>
+                  )}
+                </>
               )}
 
               {!user.isAuth ? (
-                <Button
-                  as={NavLink}
-                  to="/registration"
-                  variant="light"
-                  {...btnProps}
-                >
+                <Button as={NavLink} to="/login" variant="light" {...btnProps}>
                   Авторизация
                 </Button>
               ) : (
                 <>
-                  <Button
-                    variant="outline-light"
-                    onClick={logout}
-                    {...btnProps}
-                  >
+                  <Button variant="outline-light" onClick={logout} {...btnProps}>
                     Выход
                   </Button>
-                  <Button
-                    variant="light"
-                    onClick={handleProfileClick}
-                    {...btnProps}
-                    style={{ ...btnProps.style, padding: '0.375rem' }}
-                  >
+                  <Button variant="light" onClick={handleProfileClick} {...btnProps} style={{ padding: '0.375rem' }}>
                     <FaUserCircle style={{ fontSize: '1.5rem' }} />
                   </Button>
                 </>
@@ -107,54 +123,68 @@ const AppNav = observer(() => {
         </Container>
       </Navbar>
 
-      {/* Модальное окно профиля */}
-      <Modal show={showProfileModal} onHide={handleClose} centered>
+      {/* Profile Modal */}
+      <Modal show={showProfileModal} onHide={handleCloseProfile} centered>
         <Modal.Header closeButton>
           <Modal.Title>Профиль</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <ListGroup variant="flush">
             {isEmployer && (
-              <ListGroup.Item
-                action
-                onClick={() => {
-                  navigate('/my-vacancies');
-                  handleClose();
-                }}
-              >
-                Мои вакансии
-              </ListGroup.Item>
+              <>
+                <ListGroup.Item action onClick={() => { navigate('/my-vacancies'); handleCloseProfile(); }}>
+                  Мои вакансии
+                </ListGroup.Item>
+                <ListGroup.Item action onClick={() => { navigate('/my-companies'); handleCloseProfile(); }}>
+                  Мои компании
+                </ListGroup.Item>
+              </>
             )}
             {isCandidate && (
-              <ListGroup.Item
-                action
-                onClick={() => {
-                  navigate('/my-resumes');
-                  handleClose();
-                }}
-              >
+              <ListGroup.Item action onClick={() => { navigate('/my-resumes'); handleCloseProfile(); }}>
                 Мои резюме
               </ListGroup.Item>
             )}
-            <ListGroup.Item
-              action
-              onClick={() => {
-                navigate('/profile');
-                handleClose();
-              }}
-            >
+            <ListGroup.Item action onClick={() => { navigate('/profile'); handleCloseProfile(); }}>
               Профиль
             </ListGroup.Item>
           </ListGroup>
         </Modal.Body>
       </Modal>
-      
 
-      {/* Модалка CreateResume/CreateVacancy */}
-     <CreateResume
-       show={showCreateModal}
-      onHide={handleCloseCreate}
-     />
+      {/* Create Resume/Vacancy Modal */}
+      <CreateResume show={showCreateModal} onHide={handleCloseCreate} />
+
+      {/* Create Company Modal */}
+      <Modal show={showCompanyModal} onHide={handleCloseCompany} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Создать компанию</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Control
+                type="text"
+                placeholder="Введите название компании"
+                value={companyName}
+                onChange={e => setCompanyName(e.target.value)}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Control
+                as="textarea"
+                rows={4}
+                placeholder="Введите описание компании"
+                value={companyDesc}
+                onChange={e => setCompanyDesc(e.target.value)}
+              />
+            </Form.Group>
+            <Button variant="primary" onClick={handleSaveCompany} disabled={saving}>
+              Сохранить
+            </Button>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </>
   );
 });

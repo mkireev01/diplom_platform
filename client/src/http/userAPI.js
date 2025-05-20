@@ -46,3 +46,8 @@ export const check = async () => {
   // или присылает сразу payload
   return data;
 };
+
+export const fetchUserById = async (id) => {
+  const { data } = await $host.get(`api/user/${id}`);
+  return data;
+};
