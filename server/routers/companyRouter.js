@@ -1,8 +1,9 @@
 const express = require('express')
 const router = express.Router()
 const companyController = require("../controllers/companyController")
+const checkRoleMiddleware = require('../middleware/checkRoleMiddleware')
 
-router.post("/", companyController.create)
+router.post("/", checkRoleMiddleware("employer"), companyController.create)
 router.get("/", companyController.getAll)
 router.get("/:id", companyController.getOne)
 router.put("/:id", companyController.update)

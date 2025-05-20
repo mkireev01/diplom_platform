@@ -1,6 +1,5 @@
 const {Resume} = require("../models/models")
 
-
 class ResumeController {
     constructor(Model) {
       this.Model = Model;
@@ -9,8 +8,17 @@ class ResumeController {
     // CREATE
     async create(req, res) {
       try {
-        const record = await Resume.create(req.body);
-        return res.status(201).json(record);
+        // достаём id текущего юзера из middleware
+        const userId = req.user.id;
+  
+        // собираем данные для вставки
+        const payload = {
+          ...req.body,
+          userId,
+        };
+  
+        const resume = await Resume.create(payload);
+        return res.status(201).json(resume);
       } catch (err) {
         return res.status(400).json({ error: err.message });
       }

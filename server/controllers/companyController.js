@@ -4,8 +4,17 @@ class CompanyController {
 
   // CREATE
   async create(req, res) {
+
+    const userId = req.user.id;
+  
+        // собираем данные для вставки
+        const payload = {
+          ...req.body,
+          userId,
+        };
+  
     try {
-      const company = await Company.create(req.body);
+      const company = await Company.create(payload);
       return res.status(201).json(company);
     } catch (err) {
       return res.status(400).json({ error: err.message });

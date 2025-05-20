@@ -44,11 +44,11 @@ class UserController {
             lastName,
             email,
             password: hashedPassword,
-            role: role || 'USER'
+            role: role
           });
     
           // Генерируем JWT-токен
-          const token = generateJwt(user.id, user.fullName, user.email, user.role)
+          const token = generateJwt(user.id, user.firstName, user.lastName, user.email, user.role)
           // Возвращаем токен
           return res.status(201).json({ token });
         } catch (err) {
