@@ -14,7 +14,6 @@ const CompanyProfile = observer(() => {
     if (user.isAuth) {
       fetchCompany()
         .then(data => {
-          // ожидаем, что data — массив или единичный объект
           const list = Array.isArray(data) ? data : [data];
           const my = list.find(c => c.userId === user.user.id);
           setCompany(my || null);

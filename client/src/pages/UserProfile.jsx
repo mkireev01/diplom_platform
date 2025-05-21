@@ -9,7 +9,6 @@ import { fetchCompany } from '../http/companyAPI';
 const UserProfile = observer(() => {
   const { user, vacancies, resumes, companies } = useContext(Context);
 
-  // Load companies for employer
   useEffect(() => {
     if (user.isAuth && user.user.role === 'employer') {
       fetchCompany()

@@ -1,4 +1,3 @@
-// src/store/VacancyStore.js
 import { makeAutoObservable } from "mobx";
 
 export default class VacancyStore {
@@ -9,17 +8,14 @@ export default class VacancyStore {
     makeAutoObservable(this);
   }
 
-  // Сеттер для замены всего массива
   setVacancies(vacancies) {
     this._vacancies = vacancies;
   }
 
-  // Геттер возвращает приватное поле без рекурсии
   get vacancies() {
     return this._vacancies;
   }
 
-  // action: добавить вакансию
   addVacancy(vacancy) {
     const newId =
       this._vacancies.length > 0
@@ -28,7 +24,7 @@ export default class VacancyStore {
     this._vacancies.push({ id: newId, ...vacancy });
   }
 
-  // action: обновить вакансию по id
+
   updateVacancy(id, updatedFields) {
     const idx = this._vacancies.findIndex((v) => v.id === id);
     if (idx !== -1) {
@@ -36,12 +32,11 @@ export default class VacancyStore {
     }
   }
 
-  // action: удалить вакансию
+ 
   removeVacancy(id) {
     this._vacancies = this._vacancies.filter((v) => v.id !== id);
   }
 
-  // computed: получить вакансию по id
   getVacancyById(id) {
     return this._vacancies.find((v) => v.id === id);
   }

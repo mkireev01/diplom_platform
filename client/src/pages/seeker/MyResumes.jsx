@@ -17,7 +17,7 @@ const MyResumes = observer(() => {
   const { user, resumes } = useContext(Context);
   const isSeeker = user.isAuth && user.user?.role === 'seeker';
 
-  // Load resumes on mount or when auth/role changes
+
   useEffect(() => {
     if (user.isAuth) {
       fetchResume()
@@ -26,23 +26,23 @@ const MyResumes = observer(() => {
     }
   }, [user.isAuth]);
 
-  // Filters and pagination state
+
   const [keyword, setKeyword] = useState('');
   const itemsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Reset page on filter change
+
   useEffect(() => {
     setCurrentPage(1);
   }, [keyword]);
 
-  // Filter only current user's resumes
+
   const myResumes = useMemo(() => {
     if (!user.isAuth) return [];
     return resumes.resumes.filter(r => r.userId === user.user.id);
   }, [resumes.resumes, user.user, user.isAuth]);
 
-  // Apply search filter
+  
   const filtered = useMemo(() => {
     return myResumes.filter(r => {
       const text = (r.firstName + ' ' + r.lastName + ' ' + r.experience).toLowerCase();

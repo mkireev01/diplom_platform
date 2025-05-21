@@ -20,7 +20,7 @@ const App = observer(() => {
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
-      logout();      // очищает и MobX, и localStorage
+      logout();      
       setLoading(false);
       return;
     }
@@ -32,12 +32,10 @@ const App = observer(() => {
         console.log('🔄 check() payload.user:', u);
 
         if (u.role) {
-          // только если пришла валидная роль
           user.setUser(u);
           user.setIsAuth(true);
         } else {
-          // токен проверен, но роль сервер не вернул —
-          // считаем, что залогинен под тем, что уже в localStorage
+        
           user.setIsAuth(true);
         }
       } catch (e) {

@@ -17,15 +17,14 @@ import { fetchResume } from '../http/resumeAPI';
 const Home = observer(() => {
   const { user, vacancies, resumes } = useContext(Context);
 
-  // Логируем в консоль, кем нас считает стор
+
   useEffect(() => {
     console.log('🏷 VacancyPage — role:', user.user?.role, 'isAuth:', user.isAuth);
   }, [user.user, user.isAuth]);
 
   useEffect(() => {
-    // когда пользователь инициализируется — запускаем fetch
+
     if (!user.isAuth) {
-      // гость
       fetchVacancy().then(data => vacancies.setVacancies(data));
     } else if (user.user.role === "seeker") {
       fetchVacancy().then(data => vacancies.setVacancies(data));
@@ -36,19 +35,18 @@ const Home = observer(() => {
 
   const isEmployer = user.isAuth && user.user?.role === 'employer';
 
-  // фильтры + пагинация
   const [keyword,   setKeyword]   = useState('');
   const [minSalary, setMinSalary] = useState('');
   const [maxSalary, setMaxSalary] = useState('');
   const itemsPerPage  = 10;
   const [currentPage, setCurrentPage] = useState(1);
 
-  // при смене фильтров или роли — сбрасываем страницу на 1-ю
+  
   useEffect(() => {
     setCurrentPage(1);
   }, [keyword, minSalary, maxSalary, isEmployer]);
 
-  // отфильтрованные массивы, сразу из ваших статичных store._vacancies / store._resumes
+ 
   const filteredVacancies = useMemo(() => {
     return vacancies.vacancies.filter(v => {
       const text = (v.title + v.description).toLowerCase();
@@ -69,7 +67,7 @@ const Home = observer(() => {
     });
   }, [resumes.resumes, keyword, minSalary, maxSalary]);
 
-  // выбор, что показывать: резюме или вакансии
+
   const items      = isEmployer ? filteredResumes : filteredVacancies;
   const totalItems = items.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
