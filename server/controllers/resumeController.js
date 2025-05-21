@@ -5,13 +5,13 @@ class ResumeController {
       this.Model = Model;
     }
   
-    // CREATE
+   
     async create(req, res) {
       try {
-        // достаём id текущего юзера из middleware
+
         const userId = req.user.id;
   
-        // собираем данные для вставки
+      
         const payload = {
           ...req.body,
           userId,
@@ -24,7 +24,7 @@ class ResumeController {
       }
     }
   
-    // READ all
+ 
     async getAll(req, res) {
       try {
         const list = await Resume.findAll();
@@ -34,7 +34,7 @@ class ResumeController {
       }
     }
   
-    // READ one by ID
+   
     async getOne(req, res) {
       try {
         const { id } = req.params;
@@ -46,7 +46,7 @@ class ResumeController {
       }
     }
   
-    // UPDATE by ID
+    
     async update(req, res) {
       try {
         const { id } = req.params;
@@ -59,7 +59,7 @@ class ResumeController {
       }
     }
   
-    // DELETE by ID
+ 
     async delete(req, res) {
       try {
         const { id } = req.params;

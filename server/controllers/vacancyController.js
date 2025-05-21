@@ -2,7 +2,7 @@ const {Vacancy} = require("../models/models")
 
 class VacancyController {
   
-    // CREATE
+
     async create(req, res) {
       try {
         const record = await Vacancy.create(req.body);
@@ -12,7 +12,7 @@ class VacancyController {
       }
     }
   
-    // READ all
+   
     async getAll(req, res) {
       try {
         const list = await Vacancy.findAll();
@@ -22,7 +22,7 @@ class VacancyController {
       }
     }
   
-    // READ one by ID
+  
     async getOne(req, res) {
       try {
         const { id } = req.params;
@@ -34,7 +34,7 @@ class VacancyController {
       }
     }
   
-    // UPDATE by ID
+
     async update(req, res) {
       try {
         const { id } = req.params;
@@ -47,7 +47,7 @@ class VacancyController {
       }
     }
   
-    // DELETE by ID
+
     async delete(req, res) {
       try {
         const { id } = req.params;

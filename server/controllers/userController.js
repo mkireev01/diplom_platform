@@ -3,6 +3,7 @@ const {User} = require("../models/models")
 const jwt = require('jsonwebtoken')
 const { Op } = require('sequelize');
 
+
 const generateJwt = (id, firstName, lastName, email, role) => {
     const payload = { id, firstName, lastName, email, role };
     return jwt.sign(
@@ -17,12 +18,12 @@ class UserController {
     async registration(req, res) {
         try {
           const { firstName, lastName, email, password, role } = req.body;
-          // Проверка обязательных полей
+       
           if (!firstName || !lastName || !email || !password) {
             return res.status(400).json({ error: "Не заполнены обязательные поля" });
           }
     
-          // Проверяем, есть ли уже такой пользователь (по email или fullName)
+
           const existing = await User.findOne({
             where: {
               [Op.or]: [
@@ -34,11 +35,11 @@ class UserController {
             return res.status(400).json({ error: "Такой пользователь уже существует" });
           }
     
-          // Хешируем пароль
+       
           const saltRounds = 10;
           const hashedPassword = await bcrypt.hash(password, saltRounds);
     
-          // Создаем пользователя
+   
           const user = await User.create({
             firstName,
             lastName,
@@ -47,9 +48,9 @@ class UserController {
             role: role
           });
     
-          // Генерируем JWT-токен
+
           const token = generateJwt(user.id, user.firstName, user.lastName, user.email, user.role)
-          // Возвращаем токен
+
           return res.status(201).json({ token });
         } catch (err) {
           console.error(err);
@@ -61,10 +62,10 @@ class UserController {
         try {
           const { email, password } = req.body;
       
-          // Проверка обязательных полей
+      
          
       
-          // Ищем пользователя по email
+        
           const user = await User.findOne({ where: { email } });
           if (!user) {
             return res
@@ -72,7 +73,7 @@ class UserController {
               .json({ error: "Такого пользователя не существует" });
           }
       
-          // Сравниваем пароли
+ 
           const validPassword = await bcrypt.compare(password, user.password);
           if (!validPassword) {
             return res
@@ -80,7 +81,7 @@ class UserController {
               .json({ error: "Неверный пароль" });
           }
       
-          // Генерируем JWT (используем тот же generateJwt)
+
           const token = generateJwt(
             user.id,
             user.firstName,
@@ -89,7 +90,7 @@ class UserController {
             user.role
           );
       
-          // Отправляем токен
+
           return res.json({ token });
         } catch (err) {
           console.error(err);
@@ -109,6 +110,18 @@ class UserController {
             req.user.role
           );
         return res.json({token})
+    }
+
+    async getAllUsers(req, res) {
+      try {
+        const users = await User.findAll({
+          attributes: ['id', 'firstName', 'lastName']  
+        });
+        res.json(users);
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Ошибка при получении пользователей' });
+      }
     }
 }
 

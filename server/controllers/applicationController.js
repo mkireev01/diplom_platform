@@ -1,8 +1,6 @@
 const {Application } = require("../models/models")
 
 class ApplicationController {
-
-
     async create(req, res) {
       try {
         const record = await Application.create(req.body);
@@ -12,7 +10,7 @@ class ApplicationController {
       }
     }
   
-    // READ all
+  
     async getAll(req, res) {
       try {
         const list = await Application.findAll();
@@ -22,7 +20,7 @@ class ApplicationController {
       }
     }
   
-    // READ one by ID
+    
     async getOne(req, res) {
       try {
         const { id } = req.params;
@@ -34,7 +32,7 @@ class ApplicationController {
       }
     }
   
-    // UPDATE by ID
+   
     async update(req, res) {
       try {
         const { id } = req.params;
@@ -47,7 +45,6 @@ class ApplicationController {
       }
     }
   
-    // DELETE by ID
     async delete(req, res) {
       try {
         const { id } = req.params;

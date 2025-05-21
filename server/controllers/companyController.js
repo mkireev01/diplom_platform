@@ -2,12 +2,11 @@ const { Company } = require("../models/models");
 
 class CompanyController {
 
-  // CREATE
   async create(req, res) {
 
     const userId = req.user.id;
   
-        // собираем данные для вставки
+
         const payload = {
           ...req.body,
           userId,
@@ -21,7 +20,7 @@ class CompanyController {
     }
   }
 
-  // READ all
+
   async getAll(req, res) {
     try {
       const list = await Company.findAll();
@@ -31,7 +30,7 @@ class CompanyController {
     }
   }
 
-  // READ one by ID
+  
   async getOne(req, res) {
     try {
       const { id } = req.params;
@@ -43,7 +42,7 @@ class CompanyController {
     }
   }
 
-  // UPDATE by ID
+ 
   async update(req, res) {
     try {
       const { id } = req.params;
@@ -56,7 +55,7 @@ class CompanyController {
     }
   }
 
-  // DELETE by ID
+
   async delete(req, res) {
     try {
       const { id } = req.params;
