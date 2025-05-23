@@ -1,10 +1,11 @@
 import { $host, $authHost } from './index';
 
 
-export const createCompany= async (name, description) => {
+export const createCompany= async (name, description, telephoneNumber) => {
   const { data } = await $authHost.post('api/company', {
    name,
-   description
+   description,
+   telephoneNumber
   });
   return data;
 };
@@ -17,4 +18,10 @@ export const fetchCompany = async () => {
 export const fetchCompanyById = async (id) => {
     const { data } = await $host.get(`api/company/${id}`);
     return data;
-  };
+};
+
+export const deleteCompany = async (companyId) => {
+  const {data} = await $authHost.get(`api/company/${companyId}`)
+
+  return data
+}

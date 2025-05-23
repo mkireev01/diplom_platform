@@ -2,48 +2,67 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Context } from '../main';
-import { Container, Card, Badge, Row, Col, Spinner } from 'react-bootstrap';
+import { Container, Card, Badge, Row, Col, Spinner, Alert, Button } from 'react-bootstrap';
 import { $host } from '../http';
 
 const ItemDetailPage = observer(() => {
   const { id } = useParams();
   const { pathname } = useLocation();
-  const { vacancies, resumes } = useContext(Context);
+  const { vacancies } = useContext(Context);
 
   const isResumePage = pathname.startsWith('/resume');
   const isVacancyPage = pathname.startsWith('/vacancy');
 
   const [item, setItem] = useState(null);
   const [company, setCompany] = useState(null);
+  const [loadingItem, setLoadingItem] = useState(true);
   const [loadingCompany, setLoadingCompany] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
+    setLoadingItem(true);
+    setError(null);
     if (isResumePage) {
-      const found = resumes.resumes.find(r => r.id === +id);
-      setItem(found || null);
+      $host.get(`/api/resume/${id}`)
+        .then(({ data }) => setItem(data))
+        .catch(err => setError('Не удалось загрузить резюме'))
+        .finally(() => setLoadingItem(false));
     } else if (isVacancyPage) {
-      const found = vacancies.vacancies.find(v => v.id === +id);
-      setItem(found || null);
+      const found = vacancies.vacancies.find(v => v.id === +id) || null;
+      if (!found) setError('Вакансия не найдена');
+      setItem(found);
+      setLoadingItem(false);
     }
-  }, [id, isResumePage, isVacancyPage, resumes.resumes, vacancies.vacancies]);
+  }, [id, isResumePage, isVacancyPage, vacancies.vacancies]);
 
   useEffect(() => {
     if (isVacancyPage && item) {
       setLoadingCompany(true);
-      $host.get(`/api/company/${item.companyId}`)
+      $host
+        .get(`/api/company/${item.companyId}`)
         .then(({ data }) => setCompany(data))
-        .catch(console.error)
+        .catch(() => setCompany(null))
         .finally(() => setLoadingCompany(false));
     }
   }, [isVacancyPage, item]);
 
-  if (item === null) {
+  if (loadingItem) {
     return (
       <Container className="mt-4 text-center">
-        <Spinner animation="border" /> Загрузка...
+        <Spinner animation="border" />
       </Container>
     );
   }
+
+  if (error || !item) {
+    return (
+      <Container className="mt-4">
+        <Alert variant="warning">{error || (isResumePage ? 'Резюме не найдено' : 'Вакансия не найдена')}</Alert>
+      </Container>
+    );
+  }
+
+  const resumeLink = isResumePage ? null : `/resume/${item.userId || item.resumeOwnerId || id}`;
 
   return (
     <Container className="mt-4">
@@ -55,14 +74,15 @@ const ItemDetailPage = observer(() => {
                 ? `${item.firstName} ${item.lastName}`
                 : item.title}
             </h3>
+
             {isResumePage ? (
-              <>
+              <>  
                 <p><strong>Гражданство:</strong> {item.nationality}</p>
                 <p><strong>Дата рождения:</strong> {item.birthDate}</p>
                 <p><strong>Опыт:</strong> {item.experience}</p>
                 <p><strong>Навыки:</strong></p>
                 <div className="mb-3">
-                  {item.skills.map((skill, idx) => (
+                  {item.skills?.map((skill, idx) => (
                     <Badge key={idx} bg="secondary" className="me-1">
                       {skill}
                     </Badge>
@@ -72,7 +92,7 @@ const ItemDetailPage = observer(() => {
                 <p>{item.fullText}</p>
               </>
             ) : (
-              <>
+              <>  
                 <p><strong>Краткое описание:</strong></p>
                 <p>{item.description}</p>
                 <p><strong>Полное описание вакансии:</strong></p>
@@ -83,6 +103,17 @@ const ItemDetailPage = observer(() => {
                   {item.salaryTo ? ` – ${item.salaryTo.toLocaleString()}₽` : ''}
                 </p>
               </>
+            )}
+
+            {!isResumePage && resumeLink && (
+              <Button
+                variant="link"
+                href={resumeLink}
+                target="_blank"
+                className="p-0 mt-3"
+              >
+                Открыть резюме соискателя
+              </Button>
             )}
           </Card>
         </Col>
@@ -98,10 +129,13 @@ const ItemDetailPage = observer(() => {
                 <h5 className="mb-3">Компания</h5>
                 <p className="fw-bold mb-2">{company.name}</p>
                 {company.description && <p>{company.description}</p>}
+                {company.telephoneNumber && (
+                  <p>Контактный телефон: {company.telephoneNumber}</p>
+                )}
               </Card>
             ) : (
               <Card className="p-3 text-center shadow-sm">
-                <p>Компания не найдена</p>
+                <Alert variant="warning">Компания не найдена</Alert>
               </Card>
             )}
           </Col>

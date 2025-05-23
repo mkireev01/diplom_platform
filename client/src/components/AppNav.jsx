@@ -23,6 +23,7 @@ const AppNav = observer(() => {
   const navigate = useNavigate();
   const isEmployer = user.user?.role === 'employer';
   const isCandidate = user.user?.role === 'seeker';
+  const isAdmin = user.user?.role === "ADMIN";
 
  
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -33,6 +34,7 @@ const AppNav = observer(() => {
 
   const [companyName, setCompanyName] = useState('');
   const [companyDesc, setCompanyDesc] = useState('');
+  const [telephoneCompany, setTelephoneCompany] = useState('');
   const [savingCompany, setSavingCompany] = useState(false);
 
  
@@ -61,10 +63,11 @@ const AppNav = observer(() => {
   const handleSaveCompany = async () => {
     setSavingCompany(true);
     try {
-      const newCompany = await createCompany(companyName, companyDesc);
+      const newCompany = await createCompany(companyName, companyDesc, telephoneCompany);
       user.setCompany(newCompany);
       setCompanyName('');
       setCompanyDesc('');
+      setTelephoneCompany('')
       setShowCompanyModal(false);
     } catch (err) {
       console.error('Ошибка создания компании:', err);
@@ -96,7 +99,6 @@ const AppNav = observer(() => {
           <Navbar.Toggle aria-controls="main-navbar" />
           <Navbar.Collapse id="main-navbar" className="justify-content-end">
             <Nav className="d-flex align-items-center">
-              <Button as={NavLink} to="/vacancies" variant="outline-light" size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Вакансии</Button>
               {user.isAuth ? (
                 <>
                   {isEmployer && (
@@ -108,12 +110,23 @@ const AppNav = observer(() => {
                   {isCandidate && (
                     <Button variant="success" onClick={() => setShowCreateModal(true)} size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Создать резюме</Button>
                   )}
+                  {isAdmin && (
+                    <>
+                      <Button as={NavLink} to="/vacancies" variant="outline-light" size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Вакансии</Button>
+                      <Button as={NavLink} to="/resumes" variant="outline-light" size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Резюме</Button>
+                      <Button as={NavLink} to="/users" variant="outline-light" size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Пользователи</Button>
+                      <Button as={NavLink} to="/companies" variant="outline-light" size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Компании</Button>
+                    </>
+                  )}
                   <ChatPanel />
-                  <Button variant="outline-light" onClick={logout} size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Выход</Button>
+                  <Button variant="danger" onClick={logout} size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Выход</Button>
                   <Button variant="light" onClick={() => setShowProfileModal(true)} size="lg" className="mt-2" style={{ padding: '0.375rem' }}><FaUserCircle style={{ fontSize: '1.5rem' }} /></Button>
                 </>
               ) : (
-                <Button as={NavLink} to="/login" variant="light" size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Авторизация</Button>
+                <>
+                 <Button as={NavLink} to="/vacancies" variant="outline-light" size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Вакансии</Button>
+                 <Button as={NavLink} to="/login" variant="light" size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Авторизация</Button>
+                </>
               )}
             </Nav>
           </Navbar.Collapse>
@@ -132,6 +145,9 @@ const AppNav = observer(() => {
             </Form.Group>
             <Form.Group className="mb-3">
               <Form.Control as="textarea" rows={4} placeholder="Описание компании" value={companyDesc} onChange={e => setCompanyDesc(e.target.value)} />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Control type="text" placeholder="Контактный телефон" value={telephoneCompany} onChange={e => setTelephoneCompany(e.target.value)} />
             </Form.Group>
             <Button variant="primary" onClick={handleSaveCompany} disabled={savingCompany}>Сохранить</Button>
           </Form>

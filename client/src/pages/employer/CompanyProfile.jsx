@@ -46,6 +46,7 @@ const CompanyProfile = observer(() => {
         <Card.Header as="h4">{company.name}</Card.Header>
         <Card.Body>
           <Card.Text>{company.description}</Card.Text>
+          <Card.Text>Контактный номер компании: {company.telephoneNumber} </Card.Text>
         </Card.Body>
       </Card>
     </Container>

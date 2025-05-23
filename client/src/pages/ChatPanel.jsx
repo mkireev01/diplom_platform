@@ -197,12 +197,9 @@ const ChatPanel = observer(() => {
                         msg.senderId === user.user.id ? 'bg-primary text-white' : 'bg-light'
                       }`}
                       style={{ maxWidth: '75%' }}
-                    >
-                      {msg.content}
-                      <div className="text-muted small text-end mt-1">
-                        {new Date(msg.createdAt).toLocaleTimeString()}
-                      </div>
-                    </div>
+                      // рендерим HTML-контент сразу с ссылками
+                      dangerouslySetInnerHTML={{ __html: msg.content }}
+                    />
                   </div>
                 ))}
                 <div ref={messagesEndRef} />

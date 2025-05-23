@@ -18,3 +18,8 @@ export const fetchResume= async () => {
   const { data } = await $host.get('api/resume');
   return data
 };
+
+export const deleteResume = async (resumeId) => {
+  const { data } = await $authHost.delete(`/api/resume/${resumeId}`);
+  return data; 
+};
