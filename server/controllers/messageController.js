@@ -24,16 +24,24 @@ class MessageController {
   }
 
 
+  // messageController.js
   async create(req, res) {
-    const { chatId, senderId, content } = req.body;
+    // chatId приходит не в body, а в URL-параметре
+    const { chatId } = req.params;
+    const { senderId, content } = req.body;
 
     try {
-      const message = await Message.create({ chatId, senderId, content });
-      res.status(201).json(message);
+      const message = await Message.create({
+        chatId,      // теперь не undefined
+        senderId,
+        content
+      });
+      return res.json(message);
     } catch (err) {
       res.status(400).json({ error: err.message });
     }
   }
+
 
   
   async getOne(req, res) {

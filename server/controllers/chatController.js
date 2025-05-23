@@ -4,6 +4,7 @@ const { Op } = require('sequelize');
 class ChatController {
   // Создать новый чат или вернуть существующий
   async create(req, res) {
+    console.log('body:', req.body);
     const { seekerId, employerId } = req.body;
 
     try {

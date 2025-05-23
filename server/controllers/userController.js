@@ -115,12 +115,34 @@ class UserController {
     async getAllUsers(req, res) {
       try {
         const users = await User.findAll({
-          attributes: ['id', 'firstName', 'lastName']  
+          attributes: ['id', 'firstName', 'lastName', 'email', 'role']  
         });
         res.json(users);
       } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Ошибка при получении пользователей' });
+      }
+    }
+
+    async getOne(req, res) {
+      try {
+        const { id } = req.params;
+        const item = await User.findByPk(id);
+        if (!item) return res.status(404).json({ error: 'Not found' });
+        return res.json(item);
+      } catch (err) {
+        return res.status(500).json({ error: err.message });
+      }
+    }
+
+    async delete(req, res) {
+      try {
+        const { id } = req.params;
+        const destroyed = await User.destroy({ where: { id } });
+        if (!destroyed) return res.status(404).json({ error: 'Not found' });
+        return res.json({ message: 'Deleted' });
+      } catch (err) {
+        return res.status(500).json({ error: err.message });
       }
     }
 }

@@ -6,14 +6,23 @@ const User = sequelize.define("User", {
   lastName:     { type: DataTypes.STRING, allowNull: false },
   email:        { type: DataTypes.STRING, unique: true, allowNull: false },
   password:     { type: DataTypes.STRING, allowNull: false },
-  role:         { type: DataTypes.ENUM('employer', 'seeker'), allowNull: false },
+  role:         { type: DataTypes.ENUM('employer', 'seeker', 'ADMIN'), allowNull: false },
 });
 
 
 const Company = sequelize.define("Company", {
-  name:        { type: DataTypes.STRING, allowNull: false },
-  description: { type: DataTypes.TEXT },
+  name:             { type: DataTypes.STRING, allowNull: false },
+  description:      { type: DataTypes.TEXT },
+  telephoneNumber:  {
+    type: DataTypes.STRING(16),
+    allowNull: true,
+    unique: true,
+    validate: {
+      is: /^\+[1-9]\d{1,14}$/
+    }
+  }
 });
+
 
 
 const Resume = sequelize.define("Resume", {
@@ -40,6 +49,10 @@ const Application = sequelize.define('Application', {
   status: {
     type: DataTypes.ENUM('new', 'viewed', 'accepted', 'rejected'),
     defaultValue: 'new'
+  },
+  coverLetter: {
+    type: DataTypes.TEXT,
+    allowNull: true
   }
 });
 

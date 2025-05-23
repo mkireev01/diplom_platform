@@ -9,7 +9,7 @@ const resumeRouter = require("./resumeRouter")
 const userRouter = require("./userRouter")
 const vacancyRouter = require("./vacancyRouter")
 
-router.use('/application', applicationRouter)
+router.use('/applications', applicationRouter)
 router.use('/chats', chatRouter)
 router.use('/company', companyRouter)
 router.use('/chats/:chatId/messages', messageRouter)

@@ -7,5 +7,7 @@ router.post("/registration", userController.registration)
 router.post("/login", userController.login)
 router.get("/auth", authMiddleware, userController.check)
 router.get('/', userController.getAllUsers);
+router.get("/:id", userController.getOne)
+router.delete('/:id', userController.delete)
 
 module.exports = router; 
