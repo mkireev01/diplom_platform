@@ -101,16 +101,39 @@ class UserController {
       }
       
 
-    async check(req, res, next) {
-        const token = generateJwt(
-            req.user.id,
-            req.user.firstName,
-            req.user.lastName,
-            req.user.email,
-            req.user.role
+      async check(req, res, next) {
+        try {
+          // 1) Возьмём ID из middleware (decode JWT)
+          const userId = req.user.id;
+    
+          // 2) Подгрузим пользователя из БД, включая createdAt
+          const userFromDb = await User.findByPk(userId, {
+            attributes: ['id', 'firstName', 'lastName', 'email', 'role', 'createdAt']
+          });
+    
+          if (!userFromDb) {
+            return res.status(404).json({ error: 'User not found' });
+          }
+    
+          // 3) Сформируем новый токен (если нужно продлить срок)
+          const token = generateJwt(
+            userFromDb.id,
+            userFromDb.firstName,
+            userFromDb.lastName,
+            userFromDb.email,
+            userFromDb.role
           );
-        return res.json({token})
-    }
+    
+          // 4) Вернем и токен, и данные пользователя
+          return res.json({
+            token,
+            user: userFromDb  // здесь будет и createdAt
+          });
+        } catch (err) {
+          console.error('❌ check() failed:', err);
+          return res.status(500).json({ error: 'Server error' });
+        }
+      }
 
     async getAllUsers(req, res) {
       try {
