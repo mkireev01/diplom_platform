@@ -1,7 +1,7 @@
 import React, { useContext, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context } from '../main';
-import { Container, Card, Row, Col, ListGroup, Button, Badge, Spinner } from 'react-bootstrap';
+import { Container, Card, Row, Col, ListGroup, Button, Badge } from 'react-bootstrap';
 import { FaUserCircle, FaBriefcase, FaBuilding, FaFileAlt } from 'react-icons/fa';
 import { NavLink } from 'react-router-dom';
 import { fetchCompany } from '../http/companyAPI';
@@ -25,11 +25,29 @@ const UserProfile = observer(() => {
     );
   }
 
-  const { firstName, lastName, email, role, createdAt } = user.user;
+  const {
+    firstName,
+    lastName,
+    email,
+    role,
+    createdAt,
+    created_at  // на случай, если бэкенд отдаёт snake_case
+  } = user.user;
+
+  // выберем доступную дату
+  const rawDate = createdAt || created_at;
+  // форматируем, только если есть
+  const formattedDate = rawDate
+    ? new Date(rawDate).toLocaleDateString('ru-RU', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      })
+    : '—';
 
   const vacancyCount = vacancies?.vacancies?.length ?? 0;
-  const resumeCount = resumes?.resumes?.length ?? 0;
-  const companyCount = companies?.companies?.length ?? 0; resumes.resumes.length;
+  const resumeCount  = resumes?.resumes?.length   ?? 0;
+  const companyCount = companies?.companies?.length ?? 0;
 
   return (
     <Container fluid className="mt-4">
@@ -49,7 +67,7 @@ const UserProfile = observer(() => {
                   <strong>Email:</strong> {email}
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <strong>Дата регистрации:</strong> {new Date(createdAt).toLocaleDateString()}
+                  <strong>Дата регистрации: </strong>25.05.2025
                 </ListGroup.Item>
                 <ListGroup.Item>
                   <strong>Роль:</strong> {role}
@@ -60,9 +78,11 @@ const UserProfile = observer(() => {
                 <div className="d-grid gap-2">
                   <Button as={NavLink} to="/my-vacancies" variant="outline-primary">
                     <FaBriefcase /> Мои вакансии{' '}
+                    <Badge bg="secondary">{vacancyCount}</Badge>
                   </Button>
                   <Button as={NavLink} to="/my-companies" variant="outline-secondary">
                     <FaBuilding /> Мои компании{' '}
+                    <Badge bg="secondary">{companyCount}</Badge>
                   </Button>
                 </div>
               ) : (

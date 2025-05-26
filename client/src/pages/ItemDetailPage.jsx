@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { observer } from 'mobx-react-lite';
 import { Context } from '../main';
-import { Container, Card, Badge, Row, Col, Spinner, Alert, Button } from 'react-bootstrap';
+import { Container, Card, Badge, Row, Col, Spinner, Alert } from 'react-bootstrap';
 import { $host } from '../http';
 
 const ItemDetailPage = observer(() => {
@@ -19,27 +19,39 @@ const ItemDetailPage = observer(() => {
   const [loadingCompany, setLoadingCompany] = useState(false);
   const [error, setError] = useState(null);
 
+  // Load item data
   useEffect(() => {
     setLoadingItem(true);
     setError(null);
+
     if (isResumePage) {
+      // Fetch resume by ID
       $host.get(`/api/resume/${id}`)
         .then(({ data }) => setItem(data))
-        .catch(err => setError('Не удалось загрузить резюме'))
+        .catch(() => setError('Не удалось загрузить резюме'))
         .finally(() => setLoadingItem(false));
+
     } else if (isVacancyPage) {
-      const found = vacancies.vacancies.find(v => v.id === +id) || null;
-      if (!found) setError('Вакансия не найдена');
-      setItem(found);
-      setLoadingItem(false);
+      // Try to get from context first
+      const found = vacancies.vacancies.find(v => v.id === +id);
+      if (found) {
+        setItem(found);
+        setLoadingItem(false);
+      } else {
+        // Fetch single vacancy by API if not in context
+        $host.get(`/api/vacancy/${id}`)
+          .then(({ data }) => setItem(data))
+          .catch(() => setError('Вакансия не найдена'))
+          .finally(() => setLoadingItem(false));
+      }
     }
   }, [id, isResumePage, isVacancyPage, vacancies.vacancies]);
 
+  // Load company data for vacancy
   useEffect(() => {
     if (isVacancyPage && item) {
       setLoadingCompany(true);
-      $host
-        .get(`/api/company/${item.companyId}`)
+      $host.get(`/api/company/${item.companyId}`)
         .then(({ data }) => setCompany(data))
         .catch(() => setCompany(null))
         .finally(() => setLoadingCompany(false));
@@ -62,17 +74,13 @@ const ItemDetailPage = observer(() => {
     );
   }
 
-  const resumeLink = isResumePage ? null : `/resume/${item.userId || item.resumeOwnerId || id}`;
-
   return (
-    <Container className="mt-4">
+    <Container className="mt-4 mb-4">
       <Row className="g-4">
         <Col lg={isVacancyPage ? 8 : 12}>
           <Card className="p-4 shadow-sm">
             <h3 className="mb-3">
-              {isResumePage
-                ? `${item.firstName} ${item.lastName}`
-                : item.title}
+              {isResumePage ? `${item.firstName} ${item.lastName}` : item.title}
             </h3>
 
             {isResumePage ? (
@@ -99,22 +107,11 @@ const ItemDetailPage = observer(() => {
                 <p>{item.fullDescription}</p>
                 <p><strong>Зарплата:</strong></p>
                 <p>
-                  {item.salaryFrom.toLocaleString()}₽
-                  {item.salaryTo ? ` – ${item.salaryTo.toLocaleString()}₽` : ''}
+                  {item.salaryFrom.toLocaleString()} – {item.salaryTo.toLocaleString()} BYN
                 </p>
               </>
             )}
 
-            {!isResumePage && resumeLink && (
-              <Button
-                variant="link"
-                href={resumeLink}
-                target="_blank"
-                className="p-0 mt-3"
-              >
-                Открыть резюме соискателя
-              </Button>
-            )}
           </Card>
         </Col>
 

@@ -1,136 +1,28 @@
-/* client/src/styles/main.css */
+/* Обеспечиваем, что html/body занимают всю высоту */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
 
-/* Сброс стилей (минимальный) */
-body, h1, h2, p, ul, li, form, input, button {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  /* Общие стили для приложения */
-  .app-container {
-    font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  /* Header */
-  .header {
-    background-color: #005f73;
-    color: #fff;
-    padding: 1rem;
-  }
-  
-  .nav-list {
-    list-style: none;
-    display: flex;
-    gap: 1rem;
-    margin-top: 0.5rem;
-  }
-  
-  .nav-btn {
-    background: none;
-    border: none;
-    color: #fff;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-  
-  /* Main content */
-  main {
-    flex: 1;
-    padding: 2rem;
-  }
-  
-  /* Home page */
-  .home-page {
-    text-align: center;
-  }
-  
-  .primary-btn {
-    margin-top: 1rem;
-    padding: 0.75rem 1.5rem;
-    background-color: #0a9396;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-  
-  /* Template form */
-  .template-form {
-    max-width: 400px;
-    margin: 2rem auto;
-    background-color: #fff;
-    padding: 1.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  
-  .form-group {
-    margin-bottom: 1rem;
-  }
-  
-  .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-  }
-  
-  .form-group input {
-    width: 100%;
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 2px;
-  }
-  
-  .form-btn {
-    width: 100%;
-    padding: 0.75rem;
-    background-color: #ee9b00;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-  
-  /* Footer */
-  .footer {
-    background-color: #005f73;
-    color: #fff;
-    padding: 1rem;
-    text-align: center;
-  }
-  
-  /* Modal стили */
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .modal-content {
-    background-color: #fff;
-    padding: 2rem;
-    border-radius: 4px;
-    max-width: 500px;
-    text-align: center;
-  }
-  
-  .modal-close-btn {
-    margin-top: 1rem;
-    padding: 0.5rem 1rem;
-    background-color: #ee9b00;
-    color: #fff;
-    border: none;
-    cursor: pointer;
-  }
-  
+/* Обёртка всего приложения */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Основной контент растягивается */
+.app-content {
+  flex: 1;
+}
+
+/* Чтобы все <a> внутри .message-content были белыми (на тёмном фоне bg-primary) */
+.message-content a {
+  color: inherit;            /* унаследовать цвет текста контейнера (т. е. белый в случае bg-primary) */
+  text-decoration: underline;/* подчёркивание, как у обычных ссылок */
+}
+
+/* Если нужно чуть ярче для светлого фона bg-light: */
+.message-content.bg-light a {
+  color: #0d6efd;  /* стандартный bootstrap-синий */
+}

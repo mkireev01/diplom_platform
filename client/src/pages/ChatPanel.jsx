@@ -14,6 +14,8 @@ import {
 import { observer } from 'mobx-react-lite';
 import { Context } from '../main';
 import { $host } from '../http';
+import { FaUserCircle } from 'react-icons/fa';
+import "../styles/main.css"
 
 const ChatPanel = observer(() => {
   const { user, chats } = useContext(Context);
@@ -52,7 +54,8 @@ const ChatPanel = observer(() => {
   const handleClose = () => setShow(false);
 
   const selectChat = chat => {
-    const otherId = chat.seekerId === user.user.id ? chat.employer.id : chat.seeker.id;
+    const otherId =
+      chat.seekerId === user.user.id ? chat.employer.id : chat.seeker.id;
     chatStore.openChatWith(otherId);
     setMode('chats');
     setDraft('');
@@ -69,7 +72,6 @@ const ChatPanel = observer(() => {
     if (!text || !chatStore.currentChatId) return;
     setDraft('');
     try {
-      // Only send; assume server will echo this message back via WebSocket
       await chatStore.sendMessage(text);
     } catch (err) {
       console.error('Ошибка отправки сообщения:', err);
@@ -133,13 +135,20 @@ const ChatPanel = observer(() => {
                             onClick={() => selectChat(c)}
                             className="d-flex align-items-center"
                           >
-                            <Image
-                              src={other.avatarUrl || '/default-avatar.png'}
-                              roundedCircle
-                              width={32}
-                              height={32}
-                              className="me-2"
-                            />
+                            {other.avatarUrl ? (
+                              <Image
+                                src={other.avatarUrl}
+                                roundedCircle
+                                width={32}
+                                height={32}
+                                className="me-2"
+                              />
+                            ) : (
+                              <FaUserCircle
+                                className="me-2"
+                                style={{ fontSize: '1.5rem', color: '#6c757d' }}
+                              />
+                            )}
                             <div className="flex-grow-1">
                               <div className="fw-bold small">
                                 {other.firstName} {other.lastName}
@@ -158,13 +167,20 @@ const ChatPanel = observer(() => {
                           onClick={() => startChat(u)}
                           className="d-flex align-items-center"
                         >
-                          <Image
-                            src={u.avatarUrl || '/default-avatar.png'}
-                            roundedCircle
-                            width={32}
-                            height={32}
-                            className="me-2"
-                          />
+                          {u.avatarUrl ? (
+                            <Image
+                              src={u.avatarUrl}
+                              roundedCircle
+                              width={32}
+                              height={32}
+                              className="me-2"
+                            />
+                          ) : (
+                            <FaUserCircle
+                              className="me-2"
+                              style={{ fontSize: '1.5rem', color: '#6c757d' }}
+                            />
+                          )}
                           <div className="small">
                             {u.firstName} {u.lastName}
                           </div>
@@ -182,27 +198,25 @@ const ChatPanel = observer(() => {
 
             {/* Messages */}
             <Col xs={8} className="d-flex flex-column">
-              <div className="flex-grow-1 overflow-auto p-3">
-                {chatStore.messages.map(msg => (
-                  <div
-                    key={msg.id}
-                    className={`mb-3 d-flex ${
-                      msg.senderId === user.user.id
-                        ? 'justify-content-end'
-                        : 'justify-content-start'
-                    }`}
-                  >
+                <div className="flex-grow-1 overflow-auto p-3">
+                  {chatStore.messages.map(msg => (
                     <div
-                      className={`p-2 rounded ${
-                        msg.senderId === user.user.id ? 'bg-primary text-white' : 'bg-light'
+                      key={msg.id}
+                      className={`mb-3 d-flex ${
+                        msg.senderId === user.user.id ? 'justify-content-end' : 'justify-content-start'
                       }`}
-                      style={{ maxWidth: '75%' }}
-                      // рендерим HTML-контент сразу с ссылками
-                      dangerouslySetInnerHTML={{ __html: msg.content }}
-                    />
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
+                    >
+                      <div
+                        className={`message-content p-2 rounded ${
+                          msg.senderId === user.user.id ? 'bg-primary text-white' : 'bg-light'
+                        }`}
+                        style={{ maxWidth: '75%' }}
+                        // рендерим HTML-контент сразу с ссылками
+                        dangerouslySetInnerHTML={{ __html: msg.content }}
+                      />
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
               </div>
               <InputGroup className="p-2 border-top">
                 <Form.Control

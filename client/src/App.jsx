@@ -6,6 +6,8 @@ import AppNav    from './components/AppNav';
 import { Context } from './main';
 import { check }   from './http/userAPI';
 import axios from "axios"
+import AppFooter from './components/AppFooter';
+import './styles/main.css';   
 
 const App = observer(() => {
   const { user } = useContext(Context);
@@ -53,8 +55,14 @@ const App = observer(() => {
 
   return (
     <BrowserRouter>
+     <div className="app-wrapper">
       <AppNav />
-      <AppRouter />
+       {/* основной контент растягивается */}
+      <main className="app-content">
+         <AppRouter />
+       </main>
+       <AppFooter />
+     </div>
     </BrowserRouter>
   );
 });
