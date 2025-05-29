@@ -77,7 +77,7 @@ const UserDetail = observer(() => {
               </div>
               <Card.Title>{`${firstName} ${lastName}`}</Card.Title>
               <Card.Subtitle className="mb-2 text-muted">
-                {role}
+              {role === 'employer' ? 'Работодатель' : 'Соискатель'}
               </Card.Subtitle>
               <ListGroup variant="flush" className="text-start my-3">
                 <ListGroup.Item>
@@ -87,18 +87,49 @@ const UserDetail = observer(() => {
                   <FaCalendarAlt /> <strong>Дата регистрации:</strong> {new Date(createdAt).toLocaleDateString()}
                 </ListGroup.Item>
                 <ListGroup.Item>
-                  <FaUserTag /> <strong>Роль:</strong> {role}
+                  <FaUserTag /> <strong>Роль:</strong> {role === 'employer' ? 'Работодатель' : 'Соискатель'}
                 </ListGroup.Item>
               </ListGroup>
 
               <div className="d-grid gap-2">
-                <Button variant="danger" onClick={handleDelete} disabled={deleting}>
-                  {deleting ? 'Удаление…' : 'Удалить пользователя'}
-                </Button>
-                <Button as={NavLink} to="/users" variant="outline-secondary">
-                  Вернуться к списку
-                </Button>
-              </div>
+                  {/* Роль-зависимые действия */}
+                  {role === 'employer' && (
+                    <>
+                      <Button
+                        as={NavLink}
+                        to={`/vacancies?userId=${targetUser.id}`}
+                        variant="primary"
+                      >
+                        Вакансии пользователя
+                      </Button>
+                      <Button
+                        as={NavLink}
+                        to={`/companies?userId=${targetUser.id}`}
+                        variant="info"
+                      >
+                        Компания пользователя
+                      </Button>
+                    </>
+                  )}
+
+                  {role === 'seeker' && (
+                    <Button
+                      as={NavLink}
+                      to={`/resumes?userId=${targetUser.id}`}
+                      variant="success"
+                    >
+                      Резюме пользователя
+                    </Button>
+                  )}
+
+                  {/* Удаление и возврат */}
+                  <Button variant="danger" onClick={handleDelete} disabled={deleting}>
+                    {deleting ? 'Удаление…' : 'Удалить пользователя'}
+                  </Button>
+                  <Button as={NavLink} to="/users" variant="outline-secondary">
+                    Вернуться к списку
+                  </Button>
+                </div>
             </Card.Body>
           </Card>
         </Col>

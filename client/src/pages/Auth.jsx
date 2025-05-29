@@ -1,4 +1,3 @@
-// src/pages/Auth.jsx
 import React, { useContext, useState, useEffect } from 'react';
 import {
   Button,
@@ -27,6 +26,7 @@ const Auth = observer(() => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [emailError, setEmailError] = useState(false); // ✅ новое состояние
 
   const passwordsMatch = password === confirm;
 
@@ -37,7 +37,18 @@ const Auth = observer(() => {
     setEmail('');
     setPassword('');
     setConfirm('');
+    setEmailError(false); // ✅ сбрасываем ошибку при смене режима
   }, [location.pathname]);
+
+  // ✅ Проверка email
+  const isValidEmail = email =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  useEffect(() => {
+    if (!isLogin) {
+      setEmailError(email !== '' && !isValidEmail(email));
+    }
+  }, [email, isLogin]);
 
   const click = async () => {
     try {
@@ -48,11 +59,15 @@ const Auth = observer(() => {
         user.setIsAuth(true);
         navigate('/');
       } else {
+        if (!isValidEmail(email)) {
+          setEmailError(true);
+          return;
+        }
         data = await registration(firstName, lastName, email, password, role);
-        navigate('/login')
+        navigate('/login');
       }
     } catch (e) {
-      alert(e.response.data.message)
+      alert(e.response?.data?.message || 'Ошибка авторизации/регистрации');
     }
   };
 
@@ -112,15 +127,21 @@ const Auth = observer(() => {
           )}
 
           <Form.Control
-            className="mb-3"
+            className="mb-1"
             placeholder="Введите Ваш email..."
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
+            isInvalid={emailError}
           />
+          {!isLogin && emailError && (
+            <div style={{ color: 'red', fontSize: '0.9rem' }}>
+              Введите корректный email
+            </div>
+          )}
 
           <Form.Control
-            className="mb-3"
+            className="mb-3 mt-2"
             placeholder="Введите Ваш пароль"
             type="password"
             value={password}
@@ -156,7 +177,7 @@ const Auth = observer(() => {
             )}
             <Button
               variant="outline-success"
-              disabled={!isLogin && !passwordsMatch}
+              disabled={!isLogin && (!passwordsMatch || emailError)}
               onClick={click}
             >
               {isLogin ? 'Войти' : 'Зарегистрироваться'}

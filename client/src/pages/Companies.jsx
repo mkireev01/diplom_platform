@@ -4,6 +4,7 @@ import { Context } from "../main";
 import { fetchCompany, deleteCompany } from "../http/companyAPI";
 import { Container, Row, Col, Form, Card, Button, Pagination } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 const Companies = observer(() => {
   const { user } = useContext(Context);
@@ -16,6 +17,11 @@ const Companies = observer(() => {
   const [page, setPage] = useState(1);
   const perPage = 10;
   const [deletingId, setDeletingId] = useState(null);
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const userIdParam = queryParams.get('userId'); // строка или null
+  
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -32,10 +38,11 @@ const Companies = observer(() => {
 
   const filtered = useMemo(() => {
     return companies.filter(c => {
+      if (userIdParam && String(c.userId) !== String(userIdParam)) return false;
       const text = `${c.name}`.toLowerCase();
       return search ? text.includes(search.toLowerCase()) : true;
     });
-  }, [companies, search]);
+  }, [companies, search, userIdParam]);
 
   const total = filtered.length;
   const pages = Math.max(1, Math.ceil(total / perPage));

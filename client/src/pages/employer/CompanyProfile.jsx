@@ -1,14 +1,15 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { Context } from '../../main';
-import { Container, Card, Spinner } from 'react-bootstrap';
-import { fetchCompany } from '../../http/companyAPI';
+import { Container, Card, Spinner, Button } from 'react-bootstrap';
+import { deleteCompany, fetchCompany } from '../../http/companyAPI';
 
 const CompanyProfile = observer(() => {
   const { user } = useContext(Context);
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     if (user.isAuth) {
@@ -28,6 +29,20 @@ const CompanyProfile = observer(() => {
     }
   }, [user.isAuth, user.user]);
 
+  const handleDelete = async id => {
+    if (!window.confirm('Удалить эту компанию без возможности восстановления?')) return;
+    setDeletingId(id);
+    try {
+      await deleteCompany(id);
+      setCompany(null);
+    } catch (err) {
+      console.error('Ошибка удаления компании:', err);
+      alert('Не удалось удалить компанию.');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   if (loading) {
     return <Container className="mt-4">Загрузка компании...</Container>;
   }
@@ -46,7 +61,21 @@ const CompanyProfile = observer(() => {
         <Card.Header as="h4">{company.name}</Card.Header>
         <Card.Body>
           <Card.Text>{company.description}</Card.Text>
-          <Card.Text>Контактный номер компании: {company.telephoneNumber} </Card.Text>
+          <Card.Text>Контактный номер компании: {company.telephoneNumber}</Card.Text>
+          <Button
+            variant="danger"
+            onClick={() => handleDelete(company.id)}
+            disabled={deletingId === company.id}
+          >
+            {deletingId === company.id ? (
+              <>
+                <Spinner animation="border" size="sm" className="me-2" />
+                Удаление...
+              </>
+            ) : (
+              'Удалить компанию'
+            )}
+          </Button>
         </Card.Body>
       </Card>
     </Container>

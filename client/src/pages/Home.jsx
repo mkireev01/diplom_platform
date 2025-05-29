@@ -144,7 +144,6 @@ const Home = observer(() => {
 
   return (
     <Container fluid className="mt-4">
-      {/* Filters & List Row */}
       <Row>
         <Col md={3}>
           <Card className="p-3 mb-4 shadow-sm">
@@ -239,8 +238,6 @@ const Home = observer(() => {
               ))}
             </>
           )}
-
-          {/* Pagination */}
           {totalPages > 1 && (
             <Pagination className="justify-content-center">
               <Pagination.Prev size="sm" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} />

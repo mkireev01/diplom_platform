@@ -12,9 +12,13 @@ import {
   Pagination
 } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 const Resumes = observer(() => {
   const { resumes, user } = useContext(Context);
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const userIdParam = queryParams.get('userId'); // строка или null
 
   const isEmployer = user.isAuth && user.user?.role === 'employer';
   const isAdmin    = user.isAuth && user.user?.role === 'ADMIN';
@@ -27,7 +31,7 @@ const Resumes = observer(() => {
   const itemsPerPage = 10;
   const [loading, setLoading] = useState(false);
 
-  // Загрузка резюме для работодателей и админов
+
   useEffect(() => {
     if (user.isAuth && (isEmployer || isAdmin || isSeeker )) {
       fetchResume()
@@ -36,21 +40,23 @@ const Resumes = observer(() => {
     }
   }, [user.isAuth, isEmployer, isAdmin]);
 
-  // Сбрасываем страницу при изменении фильтров
+
   useEffect(() => {
     setCurrentPage(1);
   }, [keyword, minExp, maxExp]);
 
-  // Фильтрация
+ 
   const filtered = useMemo(() => {
     return resumes.resumes.filter(r => {
+      if (userIdParam && String(r.userId) !== String(userIdParam)) return false;
+  
       const text = (r.firstName + r.lastName + r.experience).toLowerCase();
       if (keyword && !text.includes(keyword.toLowerCase())) return false;
       if (minExp && r.experience.length < +minExp) return false;
       if (maxExp && r.experience.length > +maxExp) return false;
       return true;
     });
-  }, [resumes.resumes, keyword, minExp, maxExp]);
+  }, [resumes.resumes, keyword, minExp, maxExp, userIdParam]);
 
   const totalItems = filtered.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
@@ -67,7 +73,6 @@ const Resumes = observer(() => {
     setLoading(true);
     try {
       await deleteResume(resumeId);
-      // перезагрузим список
       const data = await fetchResume();
       resumes.setResumes(data);
     } catch (err) {

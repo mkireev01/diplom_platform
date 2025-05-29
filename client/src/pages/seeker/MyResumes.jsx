@@ -11,11 +11,12 @@ import {
   Pagination
 } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
-import { fetchResume } from '../../http/resumeAPI';
+import { deleteResume, fetchResume } from '../../http/resumeAPI';
 
 const MyResumes = observer(() => {
   const { user, resumes } = useContext(Context);
   const isSeeker = user.isAuth && user.user?.role === 'seeker';
+  const [loading,    setLoading]    = useState(false);
 
 
   useEffect(() => {
@@ -57,8 +58,23 @@ const MyResumes = observer(() => {
   const paginated = filtered.slice(startIndex, endIndex);
 
 
+  const handleDelete = async (id) => {
+    if (!window.confirm('Удалить эту вакансию без восстановления?')) return;
+    setLoading(true);
+    try {
+      await deleteResume(id);
+      const data = await fetchResume();
+      resumes.setResumes(data);
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка удаления');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const btnProps = {
-    size: 'lg',
+    size: 'sm',
     className: 'me-2 mt-2',
     style: { minWidth: 100 }
   };
@@ -88,23 +104,33 @@ const MyResumes = observer(() => {
               </p>
               {paginated.map(r => (
                 <Card key={r.id} className="mt-3 mb-3 shadow-sm">
-                  <Card.Body className="d-flex justify-content-between">
-                    <div>
-                      <Card.Title>{r.firstName} {r.lastName}</Card.Title>
-                      <Card.Text className="text-muted">
-                        {r.experience.slice(0, 100)}…
-                      </Card.Text>
-                    </div>
+                <Card.Body className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <Card.Title>{r.firstName} {r.lastName}</Card.Title>
+                    <Card.Text className="text-muted">
+                      {r.experience.slice(0, 100)}…
+                    </Card.Text>
+                  </div>
+                  <div className="d-flex gap-2">
                     <Button
                       as={NavLink}
                       to={`/resume/${r.id}`}
-                      size="lg"
                       {...btnProps}
                     >
                       Подробнее
                     </Button>
-                  </Card.Body>
-                </Card>
+                    <Button
+                      variant="danger"
+                      onClick={() => handleDelete(r.id)}
+                      disabled={loading}
+                      {...btnProps}
+                    >
+                      Удалить
+                    </Button>
+                  </div>
+                </Card.Body>
+              </Card>
+              
               ))}
               {totalPages > 1 && (
                 <Pagination className="justify-content-center">

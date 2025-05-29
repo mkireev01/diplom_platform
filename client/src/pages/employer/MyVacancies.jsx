@@ -11,11 +11,13 @@ import {
   Pagination
 } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
-import { fetchVacancy } from '../../http/vacancyAPI';
+import { deleteVacancy, fetchVacancy } from '../../http/vacancyAPI';
 
 const MyVacancies = observer(() => {
   const { user, vacancies } = useContext(Context);
   const isEmployer = user.isAuth && user.user?.role === 'employer';
+  const isAdmin = user.isAuth && user.user?.role === 'ADMIN';
+  const [loading,    setLoading]    = useState(false);
 
   useEffect(() => {
     if (isEmployer && !user.company) {
@@ -59,7 +61,7 @@ const MyVacancies = observer(() => {
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems);
   const paginated = filtered.slice(startIndex, endIndex);
 
-  const btnProps = { size: 'lg', className: 'me-2 mt-2', style: { minWidth: 100 } };
+  const btnProps = { size: 'sm', className: 'me-2 mt-2', style: { minWidth: 100 } };
 
   if (!isEmployer) {
     return (
@@ -68,6 +70,21 @@ const MyVacancies = observer(() => {
       </Container>
     );
   }
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Удалить эту вакансию без восстановления?')) return;
+    setLoading(true);
+    try {
+      await deleteVacancy(id);
+      const data = await fetchVacancy();
+      vacancies.setVacancies(data);
+    } catch (err) {
+      console.error(err);
+      alert('Ошибка удаления');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Container fluid className="mt-4">
@@ -81,7 +98,8 @@ const MyVacancies = observer(() => {
           />
         </Col>
       </Row>
-      <Row><Col>
+      <Row>
+        <Col>
         {totalItems === 0 ? (
           <p>Нет вакансий для отображения.</p>
         ) : (
@@ -91,16 +109,26 @@ const MyVacancies = observer(() => {
             </p>
             {paginated.map(v => (
               <Card key={v.id} className="mt-3 mb-3 shadow-sm">
-                <Card.Body className="d-flex justify-content-between">
+                <Card.Body className="d-flex justify-content-between align-items-center">
                   <div>
                     <Card.Title>{v.title}</Card.Title>
                     <Card.Text className="text-muted">
                       {v.description?.slice(0, 100)}…
                     </Card.Text>
                   </div>
+                  <div className="d-flex gap-2">
                   <Button as={NavLink} to={`/vacancy/${v.id}`} {...btnProps}>
                     Подробнее
                   </Button>
+                  <Button
+                          variant="danger"
+                          onClick={() => handleDelete(v.id)}
+                          disabled={loading}
+                          {...btnProps}
+                        >
+                          Удалить
+                  </Button>
+                  </div>
                 </Card.Body>
               </Card>
             ))}

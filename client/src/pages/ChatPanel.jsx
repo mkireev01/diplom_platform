@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   Offcanvas,
   Button,
@@ -14,8 +14,8 @@ import {
 import { observer } from 'mobx-react-lite';
 import { Context } from '../main';
 import { $host } from '../http';
-import { FaUserCircle } from 'react-icons/fa';
-import "../styles/main.css"
+import { FaUserCircle, FaComments, FaTimes } from 'react-icons/fa';
+import "../styles/main.css";
 
 const ChatPanel = observer(() => {
   const { user, chats } = useContext(Context);
@@ -28,14 +28,12 @@ const ChatPanel = observer(() => {
 
   const messagesEndRef = useRef(null);
 
-  // 1. Load chats when user authenticates
   useEffect(() => {
     if (user.isAuth) {
       chatStore.loadChats();
     }
   }, [user.isAuth, chatStore]);
 
-  // 2. Load contacts list when panel is opened
   useEffect(() => {
     if (show && user.isAuth) {
       $host
@@ -45,7 +43,6 @@ const ChatPanel = observer(() => {
     }
   }, [show, user.user.id]);
 
-  // 3. Auto-scroll when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatStore.messages.length]);
@@ -73,26 +70,89 @@ const ChatPanel = observer(() => {
     setDraft('');
     try {
       await chatStore.sendMessage(text);
+      await chatStore.loadMessages(chatStore.currentChatId);
     } catch (err) {
       console.error('Ошибка отправки сообщения:', err);
     }
   };
 
-  const btnProps = { size: 'lg', className: 'me-2 mt-2', style: { minWidth: 120 } };
+  // убираем дубликаты
+  const uniqueMessages = [];
+  const seenIds = new Set();
+  for (const msg of chatStore.messages) {
+    if (!seenIds.has(msg.id)) {
+      seenIds.add(msg.id);
+      uniqueMessages.push(msg);
+    }
+  }
+
+  const totalUnread = chatStore.chats.reduce((sum, c) => sum + (c.unreadCount || 0), 0);
 
   return (
     <>
-      <Button variant="outline-primary" onClick={handleShow} {...btnProps}>
-        Чат
-      </Button>
+      {/* Плавающая иконка */}
+      {!show && (
+        <Button
+          onClick={handleShow}
+          style={{
+            position: 'fixed',
+            bottom: '20px',
+            right: '20px',
+            zIndex: 1060,
+            borderRadius: '50%',
+            width: '60px',
+            height: '60px',
+            padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
+          }}
+          variant="primary"
+        >
+          <FaComments style={{ fontSize: '1.5rem', color: 'white' }} />
+          {totalUnread > 0 && (
+            <span
+              style={{
+                position: 'absolute',
+                top: '5px',
+                right: '5px',
+                background: 'red',
+                color: 'white',
+                borderRadius: '50%',
+                width: '20px',
+                height: '20px',
+                fontSize: '0.75rem',
+                lineHeight: '20px',
+                textAlign: 'center',
+              }}
+            >
+              {totalUnread > 9 ? '9+' : totalUnread}
+            </span>
+          )}
+        </Button>
+      )}
 
-      <Offcanvas show={show} onHide={handleClose} placement="end" style={{ width: '80%' }}>
-        <Offcanvas.Header closeButton>
+      <Offcanvas
+        show={show}
+        onHide={handleClose}
+        placement="end"
+        style={{ width: '80%' }}
+      >
+        <Offcanvas.Header>
           <Offcanvas.Title>Чат</Offcanvas.Title>
+          {/* Крестик вместо стандартного */}
+          <Button
+            variant="link"
+            onClick={handleClose}
+            style={{ color: '#000', textDecoration: 'none' }}
+          >
+            <FaTimes size="1.2rem" />
+          </Button>
         </Offcanvas.Header>
         <Offcanvas.Body className="p-0 h-100">
           <Row className="g-0 h-100">
-            {/* Sidebar */}
+            {/* --- Левый сайдбар --- */}
             <Col xs={4} className="border-end d-flex flex-column">
               <ButtonGroup className="m-2">
                 <Button
@@ -181,9 +241,7 @@ const ChatPanel = observer(() => {
                               style={{ fontSize: '1.5rem', color: '#6c757d' }}
                             />
                           )}
-                          <div className="small">
-                            {u.firstName} {u.lastName}
-                          </div>
+                          <div className="small">{u.firstName} {u.lastName}</div>
                         </ListGroup.Item>
                       ))}
                 </ListGroup>
@@ -196,27 +254,26 @@ const ChatPanel = observer(() => {
               </div>
             </Col>
 
-            {/* Messages */}
+            {/* --- Основная часть с сообщениями --- */}
             <Col xs={8} className="d-flex flex-column">
-                <div className="flex-grow-1 overflow-auto p-3">
-                  {chatStore.messages.map(msg => (
+              <div className="flex-grow-1 overflow-auto p-3">
+                {uniqueMessages.map(msg => (
+                  <div
+                    key={msg.id}
+                    className={`mb-3 d-flex ${
+                      msg.senderId === user.user.id ? 'justify-content-end' : 'justify-content-start'
+                    }`}
+                  >
                     <div
-                      key={msg.id}
-                      className={`mb-3 d-flex ${
-                        msg.senderId === user.user.id ? 'justify-content-end' : 'justify-content-start'
+                      className={`message-content p-2 rounded ${
+                        msg.senderId === user.user.id ? 'bg-primary text-white' : 'bg-light'
                       }`}
-                    >
-                      <div
-                        className={`message-content p-2 rounded ${
-                          msg.senderId === user.user.id ? 'bg-primary text-white' : 'bg-light'
-                        }`}
-                        style={{ maxWidth: '75%' }}
-                        // рендерим HTML-контент сразу с ссылками
-                        dangerouslySetInnerHTML={{ __html: msg.content }}
-                      />
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
+                      style={{ maxWidth: '75%' }}
+                      dangerouslySetInnerHTML={{ __html: msg.content }}
+                    />
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
               </div>
               <InputGroup className="p-2 border-top">
                 <Form.Control

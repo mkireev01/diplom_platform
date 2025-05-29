@@ -88,4 +88,11 @@ export default class ChatStore {
       });
     });
   }
+
+  async loadMessages(chatId) {
+    const { data: msgs } = await $host.get(`/api/chats/${chatId}/messages`);
+    runInAction(() => {
+      this.messages = msgs;
+    });
+  }
 }

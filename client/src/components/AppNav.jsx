@@ -118,7 +118,7 @@ const AppNav = observer(() => {
                       <Button as={NavLink} to="/companies" variant="outline-light" size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Компании</Button>
                     </>
                   )}
-                  <ChatPanel />
+                  {/* <ChatPanel /> */}
                   <Button variant="danger" onClick={logout} size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Выход</Button>
                   <Button variant="light" onClick={() => setShowProfileModal(true)} size="lg" className="mt-2" style={{ padding: '0.375rem' }}><FaUserCircle style={{ fontSize: '1.5rem' }} /></Button>
                 </>
@@ -189,6 +189,18 @@ const AppNav = observer(() => {
           </ListGroup>
         </Modal.Body>
       </Modal>
+      {user.isAuth && (
+         <div
+         style={{
+           position: 'fixed',
+           bottom: '20px',
+           right: '20px',
+           zIndex: 1050,         // надлюбой модалкой/затемнением
+         }}
+       >
+         <ChatPanel />
+       </div>
+      ) }
     </>
   );
 });

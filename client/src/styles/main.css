@@ -1,28 +1,43 @@
-/* Обеспечиваем, что html/body занимают всю высоту */
+
 html, body, #root {
   height: 100%;
   margin: 0;
 }
 
-/* Обёртка всего приложения */
+
 .app-wrapper {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
 }
 
-/* Основной контент растягивается */
+
 .app-content {
   flex: 1;
 }
 
-/* Чтобы все <a> внутри .message-content были белыми (на тёмном фоне bg-primary) */
 .message-content a {
-  color: inherit;            /* унаследовать цвет текста контейнера (т. е. белый в случае bg-primary) */
-  text-decoration: underline;/* подчёркивание, как у обычных ссылок */
+  color: inherit;            
+  text-decoration: underline;
 }
 
-/* Если нужно чуть ярче для светлого фона bg-light: */
+
 .message-content.bg-light a {
-  color: #0d6efd;  /* стандартный bootstrap-синий */
+  color: #0d6efd;  
+}
+
+.chat-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1050;
+}
+
+.chat-fab:hover {
+  box-shadow: 0 6px 16px rgba(0,0,0,0.2);
 }

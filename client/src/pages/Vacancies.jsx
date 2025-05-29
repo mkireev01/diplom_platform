@@ -12,12 +12,16 @@ import {
   Pagination
 } from 'react-bootstrap';
 import { NavLink } from 'react-router-dom';
+import { useLocation } from "react-router-dom";
 
 const Vacancies = observer(() => {
   const { vacancies, user } = useContext(Context);
 
   const isSeeker = user.isAuth && user.user?.role === 'seeker';
   const isAdmin  = user.isAuth && user.user?.role === 'ADMIN';
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const userIdParam = queryParams.get('userId'); // строка или null
 
   const [keyword,    setKeyword]    = useState('');
   const [minSalary, setMinSalary]  = useState('');
@@ -26,7 +30,6 @@ const Vacancies = observer(() => {
   const [loading,    setLoading]    = useState(false);
   const itemsPerPage = 10;
 
-  // Загрузка списка вакансий
   useEffect(() => {
     if (user.isAuth && (isSeeker || isAdmin)) {
       fetchVacancy()
@@ -35,21 +38,21 @@ const Vacancies = observer(() => {
     }
   }, [user.isAuth, isSeeker, isAdmin, vacancies]);
 
-  // Сброс страницы при смене фильтров
+
   useEffect(() => {
     setCurrentPage(1);
   }, [keyword, minSalary, maxSalary]);
 
-  // Фильтрация вакансий
   const filtered = useMemo(() => {
     return vacancies.vacancies.filter(v => {
+      if (userIdParam && String(v.userId) !== String(userIdParam)) return false;
       const txt = (v.title + v.description).toLowerCase();
       if (keyword && !txt.includes(keyword.toLowerCase())) return false;
       if (minSalary && v.salaryTo   < +minSalary) return false;
       if (maxSalary && v.salaryFrom > +maxSalary) return false;
       return true;
     });
-  }, [vacancies.vacancies, keyword, minSalary, maxSalary]);
+  }, [vacancies.vacancies, keyword, minSalary, maxSalary, userIdParam]);
 
   const totalItems = filtered.length;
   const totalPages = Math.max(1, Math.ceil(totalItems / itemsPerPage));
@@ -75,6 +78,8 @@ const Vacancies = observer(() => {
       setLoading(false);
     }
   };
+
+  
 
   const btnProps = { size: 'sm', className: 'me-2' };
 

@@ -57,7 +57,6 @@ const App = observer(() => {
     <BrowserRouter>
      <div className="app-wrapper">
       <AppNav />
-       {/* основной контент растягивается */}
       <main className="app-content">
          <AppRouter />
        </main>
