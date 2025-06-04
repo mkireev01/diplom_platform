@@ -120,7 +120,19 @@ const AppNav = observer(() => {
                   )}
                   {/* <ChatPanel /> */}
                   <Button variant="danger" onClick={logout} size="lg" className="me-2 mt-2" style={{ minWidth: 120 }}>Выход</Button>
-                  <Button variant="light" onClick={() => setShowProfileModal(true)} size="lg" className="mt-2" style={{ padding: '0.375rem' }}><FaUserCircle style={{ fontSize: '1.5rem' }} /></Button>
+                  <Button
+                    variant="light"
+                    onClick={() => setShowProfileModal(true)}
+                    size="lg"
+                    className="mt-2 d-flex align-items-center justify-content-center rounded-circle shadow"
+                    style={{
+                      width: '48px',
+                      height: '48px',
+                      padding: 0,
+                    }}
+                  >
+                  <FaUserCircle style={{ fontSize: '1.5rem' }} />
+                </Button>
                 </>
               ) : (
                 <>

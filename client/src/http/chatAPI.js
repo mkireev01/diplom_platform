@@ -17,4 +17,10 @@ export const sendMessage = async ({ chatId, senderId, content }) => {
     );
     return data;
   };
+
+export const deleteChat = async (id) => {
+  const {data} = await $authHost.delete(`/api/chats/${id}`)
+
+  return data
+}
   

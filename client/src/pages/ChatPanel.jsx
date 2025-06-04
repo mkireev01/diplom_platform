@@ -16,6 +16,7 @@ import { Context } from '../main';
 import { $host } from '../http';
 import { FaUserCircle, FaComments, FaTimes } from 'react-icons/fa';
 import "../styles/main.css";
+import { deleteChat } from '../http/chatAPI';
 
 const ChatPanel = observer(() => {
   const { user, chats } = useContext(Context);
@@ -27,7 +28,7 @@ const ChatPanel = observer(() => {
   const [mode, setMode] = useState('chats');
 
   const messagesEndRef = useRef(null);
-
+  
   useEffect(() => {
     if (user.isAuth) {
       chatStore.loadChats();
@@ -189,11 +190,13 @@ const ChatPanel = observer(() => {
                         const other = c.seekerId === user.user.id ? c.employer : c.seeker;
                         return (
                           <ListGroup.Item
-                            key={c.id}
-                            action
-                            active={c.id === chatStore.currentChatId}
+                          key={c.id}
+                          className={`d-flex align-items-center justify-content-between ${c.id === chatStore.currentChatId ? 'active' : ''}`}
+                        >
+                          <div
+                            className="d-flex align-items-center flex-grow-1"
+                            style={{ cursor: 'pointer' }}
                             onClick={() => selectChat(c)}
-                            className="d-flex align-items-center"
                           >
                             {other.avatarUrl ? (
                               <Image
@@ -209,15 +212,34 @@ const ChatPanel = observer(() => {
                                 style={{ fontSize: '1.5rem', color: '#6c757d' }}
                               />
                             )}
-                            <div className="flex-grow-1">
-                              <div className="fw-bold small">
-                                {other.firstName} {other.lastName}
-                              </div>
-                              <small className="text-truncate d-block">
-                                {c.lastMessage?.content.slice(0, 30) || '—'}
-                              </small>
+                            <div>
+                              <div className="fw-bold small">{other.firstName} {other.lastName}</div>
+                              <small className="text-truncate d-block">{c.lastMessage?.content.slice(0, 30) || '—'}</small>
                             </div>
-                          </ListGroup.Item>
+                          </div>
+                          <Button
+                            variant="link"
+                            size="sm"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              if (window.confirm('Удалить этот чат?')) {
+                                try {
+                                  await deleteChat(c.id); // удаление с бэка
+                                  chatStore.loadChats();     // обновление чатов
+                                  if (c.id === chatStore.currentChatId) {
+                                    chatStore.currentChatId = null;
+                                  }
+                                } catch (err) {
+                                  console.error('Ошибка при удалении чата:', err);
+                                }
+                              }
+                            }}
+                            style={{ color: 'red' }}
+                          >
+                            <FaTimes />
+                          </Button>
+                        </ListGroup.Item>
+                        
                         );
                       })
                     : contacts.map(u => (
