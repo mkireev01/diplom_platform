@@ -11,7 +11,6 @@ function setupSocket(io) {
       console.log(`Пользователь вошел в чат: chat_${chatId}`);
     });
 
-    // Получено сообщение
     socket.on('send_message', async (data) => {
       const { chatId, senderId, content } = data;
 
