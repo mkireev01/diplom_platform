@@ -1,0 +1,8 @@
+{
+    "build": {
+      "rootDirectory": "server",
+      "installCommand": "npm install",
+      "startCommand": "npm start"
+    }
+  }
+  
