@@ -250,7 +250,7 @@ const Home = observer(() => {
         </Col>
       </Row>
 
-      {/* Application Modal for seeker */}
+
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton><Modal.Title>Отклик на вакансию</Modal.Title></Modal.Header>
         <Modal.Body>

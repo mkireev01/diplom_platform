@@ -21,7 +21,7 @@ export const fetchCompanyById = async (id) => {
 };
 
 export const deleteCompany = async (companyId) => {
-  const {data} = await $authHost.get(`api/company/${companyId}`)
+  const {data} = await $authHost.delete(`api/company/${companyId}`)
 
   return data
 }

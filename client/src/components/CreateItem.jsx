@@ -7,7 +7,7 @@ import { createResume } from "../http/resumeAPI";
 
 
 
-const CreateResume = ({ show, onHide }) => {
+const CreateItem = ({ show, onHide }) => {
   const { user } = useContext(Context);
 
   const [firstName,    setFirstName]    = useState("");
@@ -192,4 +192,4 @@ const CreateResume = ({ show, onHide }) => {
   );
 };
 
-export default CreateResume;
+export default CreateItem;

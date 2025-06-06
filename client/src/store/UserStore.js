@@ -29,21 +29,20 @@ export default class UserStore {
     localStorage.setItem("company", JSON.stringify(company));
   }
 
- // в UserStore
-async loadMyCompany() {
-  try {
-    const data = await fetchCompany();   // вероятно: [{…}, {…}, …]
-    // находим объект, где company.userId === this._user.id
-    const mine = Array.isArray(data)
-      ? data.find(c => c.userId === this._user.id)
-      : data;
-    runInAction(() => {
-      this.setCompany(mine || null);
-    });
-  } catch (error) {
-    console.error('Ошибка загрузки компании:', error);
+ 
+  async loadMyCompany() {
+    try {
+      const data = await fetchCompany();   
+      const mine = Array.isArray(data)
+        ? data.find(c => c.userId === this._user.id)
+        : data;
+      runInAction(() => {
+        this.setCompany(mine || null);
+      });
+    } catch (error) {
+      console.error('Ошибка загрузки компании:', error);
+    }
   }
-}
 
 
   get user() {

@@ -1,18 +1,18 @@
 
 import { makeAutoObservable } from "mobx";
 
-export default class ResumeStore {
+export default class CompanyStore {
   constructor() {
-    this._resumes = [];
+    this._company = [];
 
     makeAutoObservable(this);
   }
 
-  setResumes(resumes) {
-    this._resumes = resumes;
+  setCompany(company) {
+    this._company = company;
   }
 
-  get resumes() {
-    return this._resumes;
+  get companies() {
+    return this._company;
   }
 }
