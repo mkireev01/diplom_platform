@@ -16,8 +16,21 @@ export default class ChatStore {
     this.initSocket();
   }
 
+  
   initSocket() {
-    this.socket = io("http://localhost:5000");
+    // подхватываем тот же API_URL, что и для axios
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+    // сокеты ходят на тот же домен, где у вас socket.io-сервер
+    this.socket = io(apiUrl, {
+      transports: ["websocket", "polling"], // выберите нужные
+      // если у вас custom path, добавьте path: "/socket.io"
+    });
+
+    this.socket.on("connect", () => {
+      console.log("Socket connected:", this.socket.id);
+    });
+
     this.socket.on("new_message", (msg) => {
       if (msg.chatId === this.currentChatId) {
         runInAction(() => {
