@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // VITE_API_URL доступен на этапе сборки
-const BASE_URL = import.meta.env.VITE_API_URL;
+const BASE_URL = "https://diplomplatform-production.up.railway.app"
 
 const $host = axios.create({
   baseURL: BASE_URL,
