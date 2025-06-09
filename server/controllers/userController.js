@@ -15,48 +15,66 @@ const generateJwt = (id, firstName, lastName, email, role) => {
 
 class UserController {
   
-    async registration(req, res) {
-        try {
-          const { firstName, lastName, email, password, role } = req.body;
-       
-          if (!firstName || !lastName || !email || !password) {
-            return res.status(400).json({ error: "Не заполнены обязательные поля" });
-          }
-    
-
-          const existing = await User.findOne({
-            where: {
-              [Op.or]: [
-                { email },
-              ]
-            }
-          });
-          if (existing) {
-            return res.status(400).json({ error: "Такой пользователь уже существует" });
-          }
-    
-       
-          const saltRounds = 10;
-          const hashedPassword = await bcrypt.hash(password, saltRounds);
-    
-   
-          const user = await User.create({
-            firstName,
-            lastName,
-            email,
-            password: hashedPassword,
-            role: role
-          });
-    
-
-          const token = generateJwt(user.id, user.firstName, user.lastName, user.email, user.role)
-
-          return res.status(201).json({ token });
-        } catch (err) {
-          console.error(err);
-          return res.status(500).json({ error: "Ошибка сервера" });
-        }
+  async registration(req, res) {
+    const t = await sequelize.transaction();
+    try {
+      const { firstName, lastName, email, password, role } = req.body;
+  
+      // 1) Обязательные поля
+      if (!firstName || !lastName || !email || !password) {
+        await t.rollback();
+        return res.status(400).json({ error: "Не заполнены обязательные поля" });
       }
+  
+      // 2) Проверка на существующего пользователя
+      const existing = await User.findOne({
+        where: { [Op.or]: [{ email }] },
+        transaction: t
+      });
+      if (existing) {
+        await t.rollback();
+        return res.status(400).json({ error: "Такой пользователь уже существует" });
+      }
+  
+      // 3) Хэширование пароля
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+  
+      // 4) Создание пользователя
+      const user = await User.create({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        role
+      }, { transaction: t });
+  
+      console.log(`User created (id=${user.id}), now generating JWT...`);
+  
+      // 5) Генерация токена внутри отдельного try/catch
+      let token;
+      try {
+        token = generateJwt(user.id, firstName, lastName, email, role);
+        console.log(`JWT generated for user ${user.id}`);
+      } catch (jwtErr) {
+        console.error('Error generating JWT:', jwtErr);
+        // откатываем транзакцию и удаляем пользователя
+        await t.rollback();
+        await User.destroy({ where: { id: user.id } });
+        return res.status(500).json({ error: "Ошибка при генерации токена" });
+      }
+  
+      // 6) Коммит транзакции и успешный ответ
+      await t.commit();
+      return res.status(201).json({ token });
+  
+    } catch (err) {
+      // общий catch: откатываем, логируем и отвечаем 500
+      await t.rollback();
+      console.error('Registration failed:', err);
+      return res.status(500).json({ error: "Ошибка сервера" });
+    }
+  }
 
       async login(req, res) {
         try {
