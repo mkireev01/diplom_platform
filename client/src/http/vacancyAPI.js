@@ -9,9 +9,27 @@ export const createVacancy = async (companyId, data) => {
 
 
 export const fetchVacancy = async () => {
-  const { data } = await $host.get('api/vacancy');
-  return data
+  try {
+    const { data } = await $host.get('/api/vacancy');
+
+    // Если пришёл сразу массив — возвращаем его
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    // Если это объект с полем vacancies
+    if (data && Array.isArray(data.vacancies)) {
+      return data.vacancies;
+    }
+
+    // Во всех остальных случаях — пустой массив
+    return [];
+  } catch (error) {
+    console.error("fetchVacancy error:", error);
+    return [];
+  }
 };
+
 
 export const deleteVacancy = async (vacancyId) => {
   const { data } = await $authHost.delete(`/api/vacancy/${vacancyId}`);
