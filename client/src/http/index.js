@@ -1,18 +1,15 @@
-
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000";
-
+// VITE_API_URL доступен на этапе сборки
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 const $host = axios.create({
   baseURL: BASE_URL,
 });
 
-
 const $authHost = axios.create({
   baseURL: BASE_URL,
 });
-
 
 $authHost.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
