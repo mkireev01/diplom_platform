@@ -109,6 +109,20 @@ const ItemDetailPage = observer(() => {
                 <p>
                   {item.salaryFrom.toLocaleString()} – {item.salaryTo.toLocaleString()} BYN
                 </p>
+                <p> <strong> Город: </strong></p>
+                <p>{item.location}</p>
+                <p> <strong> Тип занятости: </strong></p>
+                {item.employment === "fullemployment" && (
+                  
+                  <p> Полная занятость </p>
+                 
+                )}
+                {item.employment === "underemployment" && (
+                  <p> Частичная занятость</p>
+                )}
+                {item.employment === "remotely" && (
+                  <p> Удаленно </p>
+                )}
               </>
             )}
 

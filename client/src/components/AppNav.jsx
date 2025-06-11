@@ -24,6 +24,7 @@ const AppNav = observer(() => {
   const isEmployer = user.user?.role === 'employer';
   const isCandidate = user.user?.role === 'seeker';
   const isAdmin = user.user?.role === "ADMIN";
+  const defaultValueForVacancy = "fullemployment";
 
  
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -41,6 +42,8 @@ const AppNav = observer(() => {
   const [title, setTitle] = useState('');
   const [shortDesc, setShortDesc] = useState('');
   const [fullDesc, setFullDesc] = useState('');
+  const [location, setLocation] = useState('');
+  const [jobType, setJobType] = useState('');
   const [salaryFrom, setSalaryFrom] = useState('');
   const [salaryTo, setSalaryTo] = useState('');
   const [savingVacancy, setSavingVacancy] = useState(false);
@@ -80,9 +83,9 @@ const AppNav = observer(() => {
     if (!user.companyId) return;
     setSavingVacancy(true);
     try {
-      const vacancyData = { title, description: shortDesc, fullDescription: fullDesc, salaryFrom: Number(salaryFrom), salaryTo: Number(salaryTo) };
+      const vacancyData = { title, description: shortDesc, fullDescription: fullDesc, location: location, employment: jobType, salaryFrom: Number(salaryFrom), salaryTo: Number(salaryTo) };
       await createVacancy(user.companyId, vacancyData);
-      setTitle(''); setShortDesc(''); setFullDesc(''); setSalaryFrom(''); setSalaryTo('');
+      setTitle(''); setShortDesc(''); setFullDesc(''); setLocation(""); setJobType(''); setSalaryFrom(''); setSalaryTo('');
       setShowVacancyModal(false);
     } catch (err) {
       console.error('Ошибка создания вакансии:', err);
@@ -177,7 +180,15 @@ const AppNav = observer(() => {
               <Form.Group className="mb-3"><Form.Control type="text" placeholder="Заголовок" value={title} onChange={e => setTitle(e.target.value)} /></Form.Group>
               <Form.Group className="mb-3"><Form.Control type="text" placeholder="Краткое описание" value={shortDesc} onChange={e => setShortDesc(e.target.value)} /></Form.Group>
               <Form.Group className="mb-3"><Form.Control as="textarea" rows={4} placeholder="Полное описание" value={fullDesc} onChange={e => setFullDesc(e.target.value)} /></Form.Group>
-              <Form.Group className="mb-3"><Form.Control type="number" placeholder="Зарплата от" value={salaryFrom} onChange={e => setSalaryFrom(e.target.value)} /></Form.Group>
+              <Form.Group className="mb-3"><Form.Control type="text"placeholder="Город" value={location} onChange={e => setLocation(e.target.value)} /></Form.Group>
+              <Form.Group  сlassName="mb-3">
+                <Form.Select value={jobType} onChange={e => setJobType(e.target.value)}>
+                    <option value="fullemployment">Полная</option>
+                    <option value="underemployment">Частичная</option>
+                    <option value="remotely">Удаленная</option>
+                  </Form.Select>
+              </Form.Group>
+              <Form.Group className=" mt-3 mb-3"><Form.Control type="number" placeholder="Зарплата от" value={salaryFrom} onChange={e => setSalaryFrom(e.target.value)} /></Form.Group>
               <Form.Group className="mb-3"><Form.Control type="number" placeholder="Зарплата до" value={salaryTo} onChange={e => setSalaryTo(e.target.value)} /></Form.Group>
               <Button variant="primary" onClick={handleSaveVacancy} disabled={savingVacancy}>Сохранить</Button>
             </Form>

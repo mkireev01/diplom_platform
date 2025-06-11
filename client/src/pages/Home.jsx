@@ -66,20 +66,57 @@ const Home = observer(() => {
   useEffect(() => setCurrentPage(1), [keyword, location, jobType, minSalary, maxSalary, datePosted, minExp, maxExp]);
 
   // Filtered lists
-  const filteredVacancies = useMemo(() => vacancies.vacancies.filter(v => {
+ // Внутри Home-компонента, вместо старого useMemo
+ const cutoff = useMemo(() => {
+  if (!datePosted) return null;
+
+  const periods = {
+    '24h': 24 * 60 * 60 * 1000,
+    week: 7 * 24 * 60 * 60 * 1000,
+    month: 30 * 24 * 60 * 60 * 1000,
+  };
+
+  const ms = periods[datePosted];
+  return ms ? Date.now() - ms : null;
+}, [datePosted]);
+
+// 2) В useMemo для filteredVacancies выкидываем логику расчёта «now» и switch, оставляем только проверку
+const filteredVacancies = useMemo(() => {
+  return vacancies.vacancies.filter(v => {
+  console.log(
+    `[filter] id=${v.id}`,
+    `createdAt=${v.createdAt}`,
+    `parsed=${Date.parse(v.createdAt)}`,
+    `cutoff=${cutoff}`
+  );
+
+    // остальные ваши фильтры
     if (keyword && !(`${v.title} ${v.description}`.toLowerCase()).includes(keyword.toLowerCase())) return false;
     if (location && v.location.toLowerCase() !== location.toLowerCase()) return false;
-    if (jobType && v.type !== jobType) return false;
+    if (jobType && v.employment !== jobType) return false;
     if (minSalary && v.salaryTo < +minSalary) return false;
     if (maxSalary && v.salaryFrom > +maxSalary) return false;
-    if (datePosted) {
-      const diff = Date.now() - new Date(v.postedAt);
-      if (datePosted === '24h' && diff > 86400000) return false;
-      if (datePosted === 'week' && diff > 604800000) return false;
-      if (datePosted === 'month' && diff > 2592000000) return false;
+
+    // собственно дата: если cutoff !== null и дата создания меньше cutoff — отбрасываем
+    if (cutoff !== null) {
+      const createdAtMs = Date.parse(v.createdAt);
+      if (isNaN(createdAtMs) || createdAtMs < cutoff) {
+        return false;
+      }
     }
+
     return true;
-  }), [vacancies.vacancies, keyword, location, jobType, minSalary, maxSalary, datePosted]);
+  });
+  }, [
+    vacancies.vacancies,
+    keyword,
+    location,
+    jobType,
+    minSalary,
+    maxSalary,
+    cutoff  // теперь зависимость не datePosted, а уже готовый cutoff
+  ]);
+
 
   const filteredResumes = useMemo(() => resumes.resumes.filter(r => {
     if (keyword && !(`${r.firstName}${r.lastName}${r.experience}`.toLowerCase()).includes(keyword.toLowerCase())) return false;
@@ -162,9 +199,9 @@ const Home = observer(() => {
                   <Form.Label>Тип занятости</Form.Label>
                   <Form.Select value={jobType} onChange={e => setJobType(e.target.value)}>
                     <option value="">Любой</option>
-                    <option value="fulltime">Полная</option>
-                    <option value="parttime">Частичная</option>
-                    <option value="remote">Удаленная</option>
+                    <option value="fullemployment">Полная</option>
+                    <option value="underemployment">Частичная</option>
+                    <option value="remotely">Удаленная</option>
                   </Form.Select>
                 </Form.Group>
                 <Form.Group className="mb-2">
