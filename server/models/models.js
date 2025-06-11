@@ -39,7 +39,9 @@ const Resume = sequelize.define("Resume", {
 const Vacancy = sequelize.define('Vacancy', {
   title:           { type: DataTypes.STRING, allowNull: false },
   description:     { type: DataTypes.TEXT },    
-  fullDescription: { type: DataTypes.TEXT },    
+  fullDescription: { type: DataTypes.TEXT },
+  location: {type: DataTypes.STRING},
+  employment: {type: DataTypes.ENUM("fullemployment", "underemployment", "remotely"), allowNull: false},    
   salaryFrom:      { type: DataTypes.INTEGER },
   salaryTo:        { type: DataTypes.INTEGER },
 });
