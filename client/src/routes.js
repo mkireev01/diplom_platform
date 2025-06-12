@@ -13,6 +13,7 @@ import Vacancies from "./pages/Vacancies";
 import Users from "./pages/Users";
 import Companies from "./pages/Companies";
 import UserDetail from "./pages/UserDetail";
+import VacancyEdit from "./pages/employer/VacancyEdit";
 
 
 export const publicRoutes = [
@@ -38,5 +39,6 @@ export const seekerRoutes = [
 export const employerRoutes = [
   { path: "/my-companies", Component: CompanyProfile },
   { path: "/my-vacancies", Component: MyVacancies},
+  {path: "/vacancy/edit/:id", Component: VacancyEdit },
   { path: "/applicants", Component: Applicants },
 ];

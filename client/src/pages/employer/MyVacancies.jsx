@@ -121,6 +121,14 @@ const MyVacancies = observer(() => {
                     Подробнее
                   </Button>
                   <Button
+                    as={NavLink}
+                    to={`/vacancy/edit/${v.id}`}
+                    variant="warning"
+                    {...btnProps}
+                  >
+                    Редактировать
+                  </Button>
+                  <Button
                           variant="danger"
                           onClick={() => handleDelete(v.id)}
                           disabled={loading}

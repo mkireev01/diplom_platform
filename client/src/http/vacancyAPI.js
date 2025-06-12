@@ -40,3 +40,13 @@ export const createApplication = async ({ vacancyId, resumeId, coverLetter }) =>
   const { data } = await $authHost.post('/api/applications', { vacancyId, resumeId, coverLetter });
   return data;
 };
+
+export const fetchOneVacancy = async (id) => {
+  const { data } = await $authHost.get(`/api/vacancy/${id}`);
+  return data;
+};
+
+export const updateVacancy = async (vacancyId, vacancyData) => {
+  const {data} = await $authHost.put(`/api/vacancy/${vacancyId}`, vacancyData)
+  return data
+}
