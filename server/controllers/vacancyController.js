@@ -36,15 +36,35 @@ class VacancyController {
   
 
     async update(req, res) {
-      try {
-        const { id } = req.params;
-        const [updated] = await Vacancy.update(req.body, { where: { id } });
-        if (!updated) return res.status(404).json({ error: 'Not found' });
-        const updatedRecord = await this.Model.findByPk(id);
-        return res.json(updatedRecord);
-      } catch (err) {
-        return res.status(400).json({ error: err.message });
+      const { id } = req.params;
+      const {
+        title,
+        shortDesc,
+        description,
+        location,
+        jobType,
+        salaryFrom,
+        salaryTo
+      } = req.body;
+    
+      if (!title || !description) {
+        return res.status(400).json({ message: 'Некорректные данные' });
       }
+    
+      const vacancy = await Vacancy.findByPk(id);
+      if (!vacancy) return res.status(404).json({ message: 'Не найдено' });
+    
+      await vacancy.update({
+        title,
+        shortDesc,
+        description,
+        location,
+        jobType,
+        salaryFrom,
+        salaryTo
+      });
+    
+      return res.json(vacancy);
     }
   
 
