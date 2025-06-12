@@ -4,9 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    // после установки всех пакетов прогоним миграции
     "postinstall": "npm rebuild bcrypt --build-from-source && npx sequelize-cli db:migrate",
-    // по умолчанию запускаем сервер
     "start": "node index.js"
   }
   "keywords": [],
